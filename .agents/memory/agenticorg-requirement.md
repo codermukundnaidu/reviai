@@ -57,6 +57,16 @@ review server-side credential policy or apply the planner configuration through
 their authenticated console. Never suggest nonexistent permission checkboxes or
 grant broad administrator scope as a default workaround.
 
+Investigate the final answer before changing a confidence policy.
+
+**Why:** AgenticOrg's public runtime can compute confidence from output shape
+and length; an empty or unparseable answer can therefore trigger review without
+containing a usable proposal. Approval does not repair that missing content.
+
+**How to apply:** Check final answer text, JSON structure, provider content-block
+handling and truncation when review contains no summary. Do not force a fixed
+high confidence or lower the review threshold to mask an invalid answer.
+
 Evaluate execution access separately from configuration-write access.
 
 **Why:** The native machine credential could execute the tool-free planner even
