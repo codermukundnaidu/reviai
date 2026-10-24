@@ -71,7 +71,9 @@ The endpoint allows three concurrent model calls and 20 new requests per minute 
 
 ## ElevenLabs tool setup
 
-Use `docs/elevenlabs-planning-tool.template.json` as the tool creation body. It is a **template, not a tool already installed in ElevenLabs**.
+The live tool is installed on Revi as `tool_1201m5phma7nfvqtfzjgfxrg3bfa`, with a secure ElevenLabs secret reference and the managed planning instructions appended to the existing prompt. Tool membership, POST URL, parameter names, required fields, experience-level enum, secure header reference, and call-timing instructions were verified by reading back the provider configuration.
+
+`docs/elevenlabs-planning-tool.template.json` remains a reusable template, not a copy containing credentials. The backend was verified in development: missing authentication returns 401, invalid authenticated input returns 400, and a complete authenticated idea returns a real validated `plan_ready` response requiring approval. At the latest check, the published deployment still returned 404 for this route; republish the backend before live voice use. A live voice conversation has not yet been tested.
 
 - Name: `understand_and_plan_project`
 - Method: `POST`
@@ -86,7 +88,17 @@ The verified published origin is `https://reviai.replit.app`; the template uses 
 
 Create the tool in the ElevenLabs workspace, then attach its ID to Revi's existing agent `agent_5401m5pfy3nxezer03ar2rp5926v`. Preserve all existing tool IDs and the agent's current settings. Append `docs/revi-planning-prompt.md` to the existing system prompt rather than replacing it.
 
-The deployment URL, service authentication, and ElevenLabs account access are prerequisites for live registration. Backend implementation or template generation alone does not complete that registration.
+The deployment URL, service authentication, and ElevenLabs account access are prerequisites for registration. They are now configured for this workspace, but production must run the latest backend code and have the shared webhook secret available before the installed tool can succeed.
+
+### Server-side setup command
+
+The setup script reads `PLANNING_WEBHOOK_SECRET` only in the server-side process and transfers the complete bearer-header value to ElevenLabs' secure secret store through the managed connector. It never prints or writes the credential. It preserves existing tool IDs and the original agent prompt, appending/replacing only its own marked instructions block.
+
+```sh
+pnpm --filter @workspace/scripts run configure:revi --origin https://reviai.replit.app
+```
+
+Only pass a production origin verified through publishing metadata. The command reuses an existing matching secret reference and updates the named tool, so rerunning does not add duplicate tools or prompt blocks. If rotating `PLANNING_WEBHOOK_SECRET`, update the corresponding ElevenLabs secure secret too; rerunning alone does not replace an existing secret's value.
 
 ## Call timing and verification
 
