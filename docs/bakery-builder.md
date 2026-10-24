@@ -2,11 +2,13 @@
 
 The supported executable artifact is a bakery order tracker. A validated plan
 must use kind `tracker` and explicitly identify a bakery in its goal or title.
-Building only starts after the signed-in account owner explicitly approves that plan.
+Once AgenticOrg returns a complete plan that passes strict validation, Revi
+automatically authorizes and starts the controlled build under the user's
+configured preference. This does not publish or deploy the app.
 
 This is a fixed, supported coding workflow, **not** a public Replit Agent API,
 remote coding-agent integration, or execution of model-written server code.
-The compiler owns every HTML/CSS/JavaScript instruction; the approved plan
+The compiler owns every HTML/CSS/JavaScript instruction; the validated plan
 supplies escaped presentation text. It installs no generated dependencies and
 runs no generated shell commands. Other project kinds keep their legacy
 illustrative data-only prototypes.
@@ -58,7 +60,8 @@ they are emitted, have stable IDs, and replay after `Last-Event-ID` on reconnect
 Heartbeats keep the connection active; listeners and connection counts are
 removed on close. The UI also polls slowly as a fallback.
 
-Event types include `plan_ready`, `approval_required`, `build_started`,
+Event types include `plan_ready`, `approval_required` (AgenticOrg provider review
+only), `build_started`,
 `file_changed`, `test_started`, `test_passed`, `test_failed`, `preview_ready`,
 `build_completed`, and `build_failed`. They reflect actual work, not timers or
 simulated milestones. Build events, file metadata, test outcomes and preview
@@ -67,7 +70,9 @@ URLs survive a browser refresh.
 ## Provider boundary
 
 AgenticOrg remains the mandatory product planner. A human-gated run is not a
-completed plan, and external review approval does not authorize a Revi build.
-No OpenAI planning fallback was added. Source/database/bakery UI verification
-may use clearly labelled isolated development fixtures; such fixtures are not
-evidence of native AgenticOrg success and are never inserted into user projects.
+completed plan; Revi does not automatically approve, retrieve, or build from
+that run. Only a completed, strictly validated plan triggers the automatic
+build policy. No OpenAI planning fallback was added. Source/database/bakery UI
+verification may use clearly labelled isolated development fixtures; such
+fixtures are not evidence of native AgenticOrg success and are never inserted
+into user projects.

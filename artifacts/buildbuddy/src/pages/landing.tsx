@@ -14,7 +14,7 @@ export default function Landing() {
         <p className="text-xs font-mono uppercase tracking-widest text-primary mb-4">For people who have never coded</p>
         <h1 className="font-display font-bold text-4xl sm:text-6xl leading-[1.05] mb-5">Tell me what you are trying to get done.</h1>
         <p className="text-muted-foreground text-lg mb-8 max-w-xl">
-          BuildBuddy Voice asks the right questions about your real goal, turns it into a plan you can review, and builds a small working app once you approve. Create an account to keep your projects private and available on any browser.
+          BuildBuddy Voice asks the right questions about your goal, then automatically starts a controlled build when AgenticOrg returns a complete, validated plan. AgenticOrg may still pause a run for its own review. Create an account to keep your projects private and available on any browser.
         </p>
         <div className="flex flex-wrap gap-3">
           <Link href="/sign-up" data-testid="link-get-started" className="rounded-full bg-primary text-primary-foreground px-6 py-3 text-sm font-medium">Create an account</Link>

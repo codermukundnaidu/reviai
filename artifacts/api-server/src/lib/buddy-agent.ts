@@ -33,7 +33,7 @@ export async function clarify(project: Project, options: { timeout?: number; max
 }
 
 export async function generatePrototype(project: Project) {
-  if (!project.plan) throw new Error("No approved plan");
+  if (!project.plan) throw new Error("No validated plan");
   const response = await openai.chat.completions.create({
     model: "gpt-5.4-mini", max_completion_tokens: 8192,
     response_format: { type: "json_schema", json_schema: { name: "prototype", strict: true, schema: prototypeContract } },
@@ -41,7 +41,7 @@ export async function generatePrototype(project: Project) {
       { role: "system", content: `Generate DATA ONLY for a safe prebuilt interactive prototype.
 Return JSON {"kind":"${project.plan.kind}","title":"short title","description":"brief useful description with prototype limitations","items":["3-8 realistic useful initial item labels or information sections"]}.
 Do not output HTML, scripts, code, secrets or claim any external action happened.
-Kind must match the approved plan. Calculator supports sum and average of labeled numeric inputs only, do not claim other formulas.
+Kind must match the validated plan. Calculator supports sum and average of labeled numeric inputs only, do not claim other formulas.
 Information items must use "Heading: useful paragraph text". Trackers/checklists contain actionable short labels. Calculator items are distinct numeric input labels, not sample values.
 Respect user's actual requirements; initial content is illustrative prototype content, not live business data.` },
       { role: "user", content: JSON.stringify({ requirements: project.requirements, plan: project.plan }) },

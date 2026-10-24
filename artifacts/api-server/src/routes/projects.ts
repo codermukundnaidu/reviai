@@ -12,6 +12,7 @@ import { clarify } from "../lib/buddy-agent";
 import { isPlanningConfigured } from "../lib/buddy-agent";
 import { AgenticOrgPlanningError } from "../lib/agenticorg-planner";
 import { buildProject, busyProjects } from "../lib/build-project";
+import { autoApprovePlan, hasBuildAuthorization } from "../lib/build-authorization";
 import { recordProjectEvent } from "../lib/project-events";
 import bakeryRouter from "./bakery";
 import streamRouter from "./project-stream";
@@ -82,7 +83,22 @@ router.post("/projects", async (req, res): Promise<void> => {
 });
 router.get("/projects/:id", async (req, res): Promise<void> => {
   const project = await find(req, res);
-  if (project) res.json(GetProjectResponse.parse(project));
+  if (!project) return;
+  // Existing ready-to-build plans from before automatic approval are migrated
+  // lazily on their owner's next visit. Provider-review holds have no plan and
+  // cannot pass this check.
+  if (!busyProjects.has(project.id) && autoApprovePlan(project)) {
+    busyProjects.add(project.id);
+    try {
+      await saveProject(project, res.locals.owner);
+      await recordProjectEvent(project, res.locals.owner, "plan_ready", "Previously validated plan automatically authorized; starting the controlled build.");
+      void buildProject(project, res.locals.owner);
+    } catch (error) {
+      busyProjects.delete(project.id);
+      throw error;
+    }
+  }
+  res.json(GetProjectResponse.parse(project));
 });
 router.post("/projects/:id/messages", async (req, res): Promise<void> => {
   const parsed = SendMessageBody.safeParse(req.body);
@@ -94,8 +110,9 @@ router.post("/projects/:id/messages", async (req, res): Promise<void> => {
     return;
   }
   busyProjects.add(project.id);
+  let buildInProgress = false;
   message(project, "user", parsed.data.content.trim());
-  // Any new requirements invalidate prior plan approval and test results.
+  // Any new requirements invalidate prior plan authorization and test results.
   project.plan = undefined;
   project.prototype = undefined;
   project.tests = [];
@@ -104,7 +121,7 @@ router.post("/projects/:id/messages", async (req, res): Promise<void> => {
   for (const event of project.activities) if (event.status === "awaiting-approval") {
     event.status = "completed"; event.detail += " Superseded by a new conversation turn.";
   }
-  const event = activity(project, "Understanding your idea", "Requesting a proposal from the configured AgenticOrg planner. No build is authorized.", "running");
+  const event = activity(project, "Understanding your idea", "Requesting a proposal from the configured AgenticOrg planner. A build starts only after a complete plan passes validation.", "running");
   try {
     await saveProject(project, res.locals.owner);
     const result = await clarify(project);
@@ -116,9 +133,10 @@ router.post("/projects/:id/messages", async (req, res): Promise<void> => {
     event.status = "completed";
     event.detail = "AgenticOrg plan passed strict response and workflow validation.";
     if (result.plan) {
-      activity(project, "Plan awaiting approval", "No generation will begin until you explicitly approve this plan.", "awaiting-approval");
+      if (!autoApprovePlan(project)) throw new Error("The validated plan could not be authorized for its controlled build.");
       await recordProjectEvent(project, res.locals.owner, "plan_ready", "AgenticOrg returned a completed proposal that passed response and workflow validation.");
-      await recordProjectEvent(project, res.locals.owner, "approval_required", "Your explicit Revi approval is required before building.");
+      buildInProgress = true;
+      void buildProject(project, res.locals.owner);
     } else await saveProject(project, res.locals.owner);
     res.json(SendMessageResponse.parse(project));
   } catch (err) {
@@ -128,10 +146,11 @@ router.post("/projects/:id/messages", async (req, res): Promise<void> => {
     event.detail = detail;
     message(project, "assistant", `${detail} Your conversation has been saved.`);
     if (err instanceof AgenticOrgPlanningError && err.code === "review_required") {
+      project.status = "awaiting-approval";
       await recordProjectEvent(project, res.locals.owner, "approval_required", detail);
     } else await saveProject(project, res.locals.owner);
     res.status(502).json({ error: detail });
-  } finally { busyProjects.delete(project.id); }
+  } finally { if (!buildInProgress) busyProjects.delete(project.id); }
 });
 router.post("/projects/:id/approve", async (req, res): Promise<void> => {
   const project = await find(req, res);
@@ -142,7 +161,9 @@ router.post("/projects/:id/approve", async (req, res): Promise<void> => {
   busyProjects.add(project.id);
   try {
     for (const event of project.activities) if (event.status === "awaiting-approval") event.status = "completed";
-    activity(project, "Plan approved", "You explicitly authorized generation of this supported prototype. No deployment or external account changes authorized.", "completed");
+    if (!hasBuildAuthorization(project)) {
+      activity(project, "Plan auto-approved", "This validated plan is authorized under Revi's automatic-build setting. No deployment or external account changes authorized.", "completed");
+    }
     project.status = "building";
     project.tests = []; project.prototype = undefined; project.reviewApproved = false;
     await saveProject(project, res.locals.owner);

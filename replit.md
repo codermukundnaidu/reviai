@@ -1,6 +1,6 @@
 # BuildBuddy Voice
 
-A goal-first AI developer companion for non-programmers, with approved plans, a controlled real bakery app builder, legacy data-driven prototypes, and truthful live workflow status.
+A goal-first AI developer companion for non-programmers, with strictly validated plans, automatic controlled builds, legacy data-driven prototypes, and truthful live workflow status.
 
 ## Run & Operate
 
@@ -37,16 +37,16 @@ A goal-first AI developer companion for non-programmers, with approved plans, a 
 - Authentication uses Replit-managed Clerk with branded local sign-in/sign-up and the canonical production proxy. Projects are owned by verified `clerk:<userId>` server identity, never a client-supplied owner or guest cookie fallback.
 - First authenticated access claims projects proven by the existing unguessable `bb_session` cookie, atomically preserving project payloads, previews, and order records. Clear that legacy cookie only after success; delay migration while old work is active. **Why:** adding accounts must not discard existing user work or strand in-flight writes.
 - Health and the independently bearer-authenticated ElevenLabs planning webhook remain outside account enforcement. All project, preview, order, integration-status, and SSE routes require account authentication. User changes clear browser query caches and unmount live streams.
-- The user explicitly reconnected AgenticOrg as Revi's text/webhook planner. Use the configured hackathon instance and native UUID run endpoint with inputs.task; do not silently fall back to OpenAI for planning. Strictly validate completed tool-free results, and show failed or human-gated runs honestly. OpenAI through Replit AI Integrations is still the separate approved prototype generator. Keep explicit Revi approval before generation.
+- The user explicitly reconnected AgenticOrg as Revi's text/webhook planner. Use the configured hackathon instance and native UUID run endpoint with inputs.task; do not silently fall back to OpenAI for planning. Strictly validate completed tool-free results, and show failed or human-gated runs honestly. A valid ready plan is auto-authorized under the user's explicit preference; AgenticOrg HITL is never auto-approved. OpenAI through Replit AI Integrations is still the separate prototype generator.
 
 ## Product
 
-- Select Beginner, Intermediate, Advanced or Pro, clarify an idea through AI text conversation, inspect understanding and explicitly approve a plan.
-- Real builder MVP: explicitly approved bakery tracker plans compile into trusted HTML/CSS/JavaScript in a private temporary workspace, with durable source files in App Storage, a private executable preview, and real checks. It is a constrained coding workflow, not a programmatic Replit Agent API or arbitrary model-code execution. See `docs/bakery-builder.md`.
+- Select Beginner, Intermediate, Advanced or Pro and clarify an idea through AI text conversation. Complete, strictly validated plans automatically start the configured build.
+- Real builder MVP: validated bakery tracker plans compile into trusted HTML/CSS/JavaScript in a private temporary workspace, with durable source files in App Storage, a private executable preview, and real checks. It is a constrained coding workflow, not a programmatic Replit Agent API or arbitrary model-code execution. Nothing is deployed or published. See `docs/bakery-builder.md`.
 - Bakery orders persist in PostgreSQL with project ownership checks and optimistic concurrency. Legacy tracker/checklist/calculator/information prototypes remain data-only/localStorage. Keep those capabilities distinct.
 - Project progress uses SSE with persisted event IDs and replay. Emit events only for actual backend work; never use hardcoded progress animations or invent test passes.
 - Inspect backend-persisted activity, actual structural checks, review decisions and project history.
-- Voice uses the official ElevenLabs public-agent widget, loaded on demand from the home/project microphone controls. Calls remain separate from saved project chat and must not bypass explicit plan approvals. No ElevenLabs API key is required for this public embed.
+- Voice uses the official ElevenLabs public-agent widget, loaded on demand from the home/project microphone controls. Calls remain separate from saved project chat and cannot authorize a build. No ElevenLabs API key is required for this public embed.
 - Revi must call `understand_and_plan_project` only once the user's idea is sufficiently understood, not after every sentence. Acknowledgements and approvals do not trigger replanning; meaningful revisions or answered clarification questions can.
 - Planning webhook authentication is server-to-server only. Never expose `PLANNING_WEBHOOK_SECRET` to the browser or make planning calls count as approval/build actions. Live ElevenLabs tool installation is separate from implementing the API.
 

@@ -3,7 +3,7 @@ import { spawnSync } from "node:child_process";
 
 await build({
   stdin: {
-    contents: 'import "./src/lib/plan-project.test.ts"; import "./src/lib/agenticorg-planner.test.ts"; import "./src/lib/bakery-build.test.ts"; import "./src/middlewares/account-access.test.ts";',
+    contents: 'import "./src/lib/plan-project.test.ts"; import "./src/lib/agenticorg-planner.test.ts"; import "./src/lib/bakery-build.test.ts"; import "./src/lib/build-authorization.test.ts"; import "./src/middlewares/account-access.test.ts";',
     resolveDir: process.cwd(),
     loader: "ts",
   },

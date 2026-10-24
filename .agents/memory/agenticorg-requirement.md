@@ -10,9 +10,19 @@ remains the separate approved prototype generator, not a planning fallback.
 **Why:** The user first removed AgenticOrg after authorization failures, then
 tested their hackathon instance and explicitly requested reconnection.
 
-**How to apply:** Keep server validation, provider review, Revi's explicit build
-approval, and implementation separate. Do not describe configured credentials,
-HTTP 200, or a human-approved review as proof of a completed valid plan.
+**How to apply:** Keep server validation, AgenticOrg provider review, and
+implementation separate. Revi automatically authorizes a ready plan only after
+it passes strict validation; never auto-approve AgenticOrg HITL or build from a
+pending, incomplete, or invalid result. Do not describe configured credentials,
+HTTP 200, or a human-approved provider review as proof of a completed valid plan.
+
+**Why:** The user explicitly chose to remove Revi's per-plan confirmation and
+start the controlled build automatically, while distinguishing that gate from
+AgenticOrg's own human review.
+
+**How to apply:** Auto-build only completed, validated ready plans. Clarification
+questions, provider HITL, invalid results, or incomplete requirements must not
+authorize a build. Automatic build approval does not publish or deploy.
 
 For this project's AgenticOrg tests, use the user-provided hackathon instance:
 `https://agenticorg.hackathon.pinelabs.com`, not the SDK's default

@@ -9,6 +9,7 @@ import { generatedFileNames, saveGeneratedFile, readGeneratedFile, fileHash } fr
 import { recordProjectEvent } from "./project-events";
 import { createBakeryOrder, listBakeryOrders, updateBakeryOrder, deleteBakeryOrder, cleanVerificationOrders, OrderError } from "./bakery-orders";
 import { logger } from "./logger";
+import { hasBuildAuthorization } from "./build-authorization";
 
 export function isBakeryPlan(project: Project) {
   return project.plan?.kind === "tracker" &&
@@ -19,11 +20,10 @@ export function isBakeryPlan(project: Project) {
 export async function buildBakeryProject(project: Project, owner: string) {
   let workspace: string | undefined;
   const scope = `__verification_${randomUUID()}`;
-  let current = activity(project, "Starting bakery builder", "Preparing a private workspace for the approved bakery app.", "running");
+  let current = activity(project, "Starting bakery builder", "Preparing a private workspace for the authorized bakery app.", "running");
   try {
-    if (!isBakeryPlan(project) || project.status !== "building" ||
-        !project.activities.some(event => event.title === "Plan approved" && event.status === "completed")) {
-      throw new Error("Explicit plan approval is required");
+    if (!isBakeryPlan(project) || project.status !== "building" || !hasBuildAuthorization(project)) {
+      throw new Error("A validated plan with build authorization is required");
     }
     const id = randomUUID();
     workspace = await mkdtemp(join(tmpdir(), "revi-bakery-"));
@@ -107,7 +107,7 @@ export async function buildBakeryProject(project: Project, owner: string) {
     await recordProjectEvent(project, owner, "preview_ready", `Generated app available at ${project.build.previewUrl}`);
     project.status = "ready";
     activity(project, "Bakery app ready for review", "Open the actual generated preview. Orders persist in this project's PostgreSQL records.", "awaiting-approval");
-    message(project, "assistant", "Your bakery order tracker has been built from the approved plan using the supported controlled workflow. The generated HTML, CSS and JavaScript are available in Preview, and the actual checks are in Review. You can add, edit, mark ready and delete orders; records persist after refresh. This is private to your account, not a separately published app or an arbitrary coding-agent build.");
+    message(project, "assistant", "Your bakery order tracker has been built from the validated plan using Revi's controlled workflow. The generated HTML, CSS and JavaScript are available in Preview, and the actual checks are in Review. You can add, edit, mark ready and delete orders; records persist after refresh. This is private to your account, not a separately published app or an arbitrary coding-agent build.");
     await recordProjectEvent(project, owner, "build_completed", "Bakery app generated, stored, checked, and ready for your review.");
   } catch (error) {
     logger.error({ errorType: error instanceof Error ? error.name : "UnknownError", projectId: project.id }, "Bakery build failed");
@@ -115,7 +115,7 @@ export async function buildBakeryProject(project: Project, owner: string) {
     current.detail = "The build or a real check failed. No successful preview is claimed.";
     project.status = "failed";
     if (project.build) { project.build.status = "failed"; project.build.previewUrl = undefined; }
-    message(project, "assistant", "The bakery build did not complete. Review the actual activity and test results before retrying the approved plan. Existing bakery orders were not changed by the build.");
+    message(project, "assistant", "The bakery build did not complete. Review the actual activity and test results before retrying. Existing bakery orders were not changed by the build.");
     await recordProjectEvent(project, owner, "build_failed", current.detail).catch(() => saveProject(project, owner));
   } finally {
     await cleanVerificationOrders(scope).catch(() => {});

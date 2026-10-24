@@ -108,6 +108,9 @@ test("provider failures are classified without exposing private error text", asy
     await assert.rejects(requestAgenticOrgPlan({}, { key: "test-only-key", plannerId, fetcher: client.fetcher }), e =>
       e instanceof AgenticOrgPlanningError && e.code === "execution_failed" && !e.message.includes("private payload"));
   }
+  const limited = transport([{ ...completed, status: "failed", error: "GoogleRateLimitError: private payload" }]);
+  await assert.rejects(requestAgenticOrgPlan({}, { key: "test-only-key", plannerId, fetcher: limited.fetcher }), e =>
+    e instanceof AgenticOrgPlanningError && e.message.includes("Wait for the provider quota to reset"));
   const fetcher: typeof fetch = async () => { throw new Error("private network payload"); };
   await assert.rejects(requestAgenticOrgPlan({}, { key: "test-only-key", plannerId, fetcher }), e =>
     e instanceof AgenticOrgPlanningError && e.code === "transport" && !e.message.includes("private network payload"));

@@ -68,9 +68,10 @@ export default function ProjectPage() {
   const status = project?.status;
   const prevStatus = useRef(status);
   useEffect(() => {
-    if (prevStatus.current && status && prevStatus.current !== status) {
+    if (status && prevStatus.current !== status) {
       if (status === 'awaiting-approval') setTab('Plan');
-      if (status === 'ready') setTab('Preview');
+      if (status === 'building') { setTab('Activity'); setPane('work'); }
+      if (status === 'ready') { setTab('Preview'); setPane('work'); }
     }
     prevStatus.current = status;
   }, [status]);
@@ -92,7 +93,6 @@ export default function ProjectPage() {
   };
   const req = project.requirements;
   const msgs = project.messages;
-  const awaiting = project.status === 'awaiting-approval';
   const busy = !!pending || project.status === 'building';
 
   const chat = (
@@ -115,7 +115,11 @@ export default function ProjectPage() {
         <div ref={endRef} />
       </div>
       <div className="p-3 sm:p-4 border-t bg-background">
-        {err && <p role="alert" data-testid="text-send-error" className="text-sm text-destructive mb-2">{err} Your message is kept below so you can resend.</p>}
+        {err && <p role="alert" data-testid="text-send-error" className="text-sm text-destructive mb-2">
+          {err} {/(?:rate[ -]?limit|quota)/i.test(err)
+            ? 'Wait for the provider limit to reset before trying again; another immediate request may fail too.'
+            : 'Your message is kept below so you can resend.'}
+        </p>}
         <div className="rounded-2xl border bg-card p-2 flex items-end gap-2 focus-within:ring-2 focus-within:ring-ring/25">
           <VoiceButton />
           <textarea rows={2} value={draft} onChange={(e) => setDraft(e.target.value)} maxLength={10000} data-testid="input-message" placeholder="Reply to BuildBuddy"
@@ -168,14 +172,14 @@ export default function ProjectPage() {
             <p className="text-sm text-muted-foreground mb-4">{project.plan.rationale}</p>
             <ol className="space-y-2 mb-5">{project.plan.steps.map((s, i) => (
               <li key={i} className="flex gap-3 text-sm"><span className="size-6 rounded-full bg-accent text-accent-foreground grid place-items-center text-xs shrink-0">{i + 1}</span>{s}</li>))}</ol>
-            <p className="text-xs text-muted-foreground mb-4">Revi currently builds one controlled thing: a bakery order tracker from a fixed template, with orders saved in a database. Custom coding is not part of this workflow yet. Nothing is built until you approve.</p>
-            {awaiting || project.status === 'failed' ? (
-              <button onClick={() => run(() => approve.mutateAsync({ id }))} disabled={approve.isPending} data-testid="button-approve"
+            <p className="text-xs text-muted-foreground mb-4">A complete plan automatically starts Revi's controlled build. Revi currently builds a bakery order tracker from a fixed template, with orders saved in a database. This does not publish or deploy the app; AgenticOrg may still pause its own run for review.</p>
+            {project.status === 'failed' && project.plan ? (
+              <button onClick={() => run(() => approve.mutateAsync({ id }))} disabled={approve.isPending} data-testid="button-retry-build"
                 className="rounded-full bg-primary text-primary-foreground px-6 py-2.5 text-sm font-medium flex items-center gap-2 disabled:opacity-60">
-                {approve.isPending && <Loader2 className="size-4 animate-spin" />}{project.status === 'failed' ? 'Retry approved plan' : 'Approve plan and start building'}</button>
-            ) : <p className="text-sm font-medium" data-testid="text-plan-state">{project.status === 'building' ? 'Approved. Building now.' : project.status === 'ready' ? 'Approved and built.' : 'Plan recorded.'}</p>}
+                {approve.isPending && <Loader2 className="size-4 animate-spin" />}Retry build</button>
+            ) : <p className="text-sm font-medium" data-testid="text-plan-state">{project.status === 'building' ? 'Plan validated. Building automatically.' : project.status === 'ready' ? 'Build complete. Review the preview and checks.' : project.status === 'awaiting-approval' ? 'Starting the automatic build…' : 'Plan recorded.'}</p>}
           </div>
-        ) : <div className={`${card} border-dashed text-sm text-muted-foreground`}>No plan yet. I only propose one after I understand your goal, and nothing is built until you approve it.</div>)}
+        ) : <div className={`${card} border-dashed text-sm text-muted-foreground`}>No plan yet. I only build after AgenticOrg returns a complete, valid plan; AgenticOrg may pause a run for its own review.</div>)}
         {tab === 'Activity' && <EventTimeline events={project.events ?? []} />}
         {tab === 'Activity' && (project.activities.length ? (
           <ol className="space-y-3">{project.activities.map((a) => (
@@ -187,7 +191,7 @@ export default function ProjectPage() {
             </li>))}</ol>
         ) : <div className={`${card} border-dashed text-sm text-muted-foreground`}>No activity yet. Real steps show up here as they happen.</div>)}
         {tab === 'Preview' && (project.build ? <BuildPreview projectId={project.id} build={project.build} /> : project.prototype ? <PrototypeView projectId={project.id} prototype={project.prototype} />
-          : <div className={`${card} border-dashed text-sm text-muted-foreground`}>{project.status === 'building' ? <span className="flex items-center gap-2"><Loader2 className="size-4 animate-spin" />Building your prototype...</span> : 'No prototype yet. Approve a plan to build one.'}</div>)}
+          : <div className={`${card} border-dashed text-sm text-muted-foreground`}>{project.status === 'building' ? <span className="flex items-center gap-2"><Loader2 className="size-4 animate-spin" />Building your prototype...</span> : 'No prototype yet. A complete, validated plan starts the build automatically.'}</div>)}
         {tab === 'Review' && (
           <div className={card}>
             {!project.reviewApproved && project.activities.some(a => a.title === 'Changes requested') && <p className="text-sm font-medium mb-3">Changes requested. Continue the conversation to explain what should change.</p>}

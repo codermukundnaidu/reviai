@@ -3,6 +3,7 @@ import { generatePrototype, prototypeSchema } from "./buddy-agent";
 import { logger } from "./logger";
 import { isBakeryPlan, buildBakeryProject } from "./bakery-build";
 import { recordProjectEvent } from "./project-events";
+import { hasBuildAuthorization } from "./build-authorization";
 
 // All mutations for a project are serialized within the single API process.
 export const busyProjects = new Set<string>();
@@ -14,7 +15,7 @@ export async function buildProject(project: Project, owner: string): Promise<voi
   project.build = undefined;
   let current = activity(project, "Generating prototype", "Generating safe prototype data with OpenAI through Replit AI Integrations.", "running");
   try {
-    await recordProjectEvent(project, owner, "build_started", "Generating the approved legacy data-only prototype; no source-code app is claimed.");
+    await recordProjectEvent(project, owner, "build_started", "Generating the authorized legacy data-only prototype; no source-code app is claimed.");
     const prototype = await generatePrototype(project);
     current.status = "completed";
     current.detail = "Prototype data returned and validated against the supported data contract.";
@@ -23,10 +24,10 @@ export async function buildProject(project: Project, owner: string): Promise<voi
     project.prototype = prototype;
     const checks = [
       { name: "Prototype data schema", check: () => prototypeSchema.safeParse(prototype).success, detail: "Validated required fields and rejected unknown properties." },
-      { name: "Approved prototype type", check: () => prototype.kind === project.plan?.kind, detail: "Compared generated kind against the explicitly approved plan." },
+      { name: "Planned prototype type", check: () => prototype.kind === project.plan?.kind, detail: "Compared generated kind against the validated plan." },
       { name: "Usable starting content", check: () => prototype.items.length > 0 && prototype.items.every(item => item.trim().length > 0), detail: "Checked that every initial item contains non-empty text." },
       { name: "No executable payload", check: () => !JSON.stringify(prototype).match(/<script|javascript:|onerror\s*=/i), detail: "Scanned data for common executable markup; rendering uses React text only, never generated code." },
-      { name: "Plan approval recorded", check: () => project.activities.some(a => a.title === "Plan approved" && a.status === "completed"), detail: "Verified explicit approval event exists before generation." },
+      { name: "Build authorization recorded", check: () => hasBuildAuthorization(project), detail: "Verified the validated plan has automatic or explicit build authorization before generation." },
     ];
     project.tests = [];
     for (const test of checks) {
@@ -40,9 +41,9 @@ export async function buildProject(project: Project, owner: string): Promise<voi
     current.detail = `${project.tests.filter(t => t.passed).length}/${project.tests.length} structural checks passed. Browser behavior has not been automatically tested.`;
     project.status = passed ? "ready" : "failed";
     activity(project, passed ? "Ready for your review" : "Prototype checks failed",
-      passed ? "Open the interactive preview, then approve or request changes." : "Review the actual check results before retrying.", passed ? "awaiting-approval" : "failed");
+      passed ? "Open the interactive preview and review the actual checks." : "Review the actual check results before retrying.", passed ? "awaiting-approval" : "failed");
     message(project, "assistant", passed
-      ? "Your prototype is ready. I generated data for a supported, prebuilt interactive tool and ran the structural checks shown in Review. No external service was changed or deployed. Try the preview, then approve it or tell me what to change."
+      ? "Your prototype is ready. I generated data for a supported, prebuilt interactive tool and ran the structural checks shown in Review. No external service was changed or deployed. Try the preview and tell me what to change if needed."
       : "The generated prototype did not pass all structural checks. Review the results and tell me what to change; I have not marked it ready.");
     await recordProjectEvent(project, owner, passed ? "build_completed" : "build_failed", current.detail);
   } catch (err) {
@@ -50,7 +51,7 @@ export async function buildProject(project: Project, owner: string): Promise<voi
     current.status = "failed";
     current.detail = "Generation failed or the provider returned invalid data. No successful build is claimed.";
     project.status = "failed";
-    message(project, "assistant", "I couldn't complete this prototype. You can retry the approved plan, or send a message to revise it. No external changes were made.");
+    message(project, "assistant", "I couldn't complete this prototype. You can retry the build, or send a message to revise the plan. No external changes were made.");
     await recordProjectEvent(project, owner, "build_failed", current.detail).catch(error => logger.error({ error }, "Failed to persist generation error"));
   } finally {
     busyProjects.delete(project.id);
