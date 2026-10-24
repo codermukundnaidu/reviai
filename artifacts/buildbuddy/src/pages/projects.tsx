@@ -27,7 +27,7 @@ export default function Projects() {
         <div className="rounded-3xl border border-dashed p-10 text-center" data-testid="text-empty">
           <p className="font-display font-bold text-xl mb-1">No projects yet</p>
           <p className="text-sm text-muted-foreground mb-4">Tell me what you want to get done and the first one will appear here.</p>
-          <Link href="/" className="inline-block rounded-full bg-primary text-primary-foreground px-5 py-2 text-sm" data-testid="link-start">Start one</Link>
+          <Link href="/new" className="inline-block rounded-full bg-primary text-primary-foreground px-5 py-2 text-sm" data-testid="link-start">Start one</Link>
         </div>
       )}
       <ul className="space-y-3">

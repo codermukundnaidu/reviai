@@ -25,7 +25,7 @@ A goal-first AI developer companion for non-programmers, with approved plans, a 
 ## Where things live
 
 - `artifacts/buildbuddy/src`: React screens, theme, controlled prototype renderers.
-- `artifacts/api-server/src/routes/projects.ts`: browser-owned project endpoints.
+- `artifacts/api-server/src/routes/projects.ts`: authenticated, account-owned project endpoints.
 - `artifacts/api-server/src/lib`: AI clarification, prototype generation, persistence and restart recovery.
 - `lib/api-spec/openapi.yaml`: source-of-truth contract; regenerate clients after edits.
 - `lib/db/src/schema/projects.ts`: project persistence.
@@ -34,7 +34,9 @@ A goal-first AI developer companion for non-programmers, with approved plans, a 
 
 - Publish on **Reserved VM with a single API process**, not multiple Autoscale instances: this release has process-local job coordination and background provider calls. A restart marks interrupted work failed and requires explicit retry.
 - Prototype generation returns only validated data for four prebuilt React renderers. This intentionally limits scope to avoid executing untrusted model code.
-- No accounts were requested. Projects are owned by an opaque, httpOnly browser cookie, not shared across devices; clearing cookies loses access.
+- Authentication uses Replit-managed Clerk with branded local sign-in/sign-up and the canonical production proxy. Projects are owned by verified `clerk:<userId>` server identity, never a client-supplied owner or guest cookie fallback.
+- First authenticated access claims projects proven by the existing unguessable `bb_session` cookie, atomically preserving project payloads, previews, and order records. Clear that legacy cookie only after success; delay migration while old work is active. **Why:** adding accounts must not discard existing user work or strand in-flight writes.
+- Health and the independently bearer-authenticated ElevenLabs planning webhook remain outside account enforcement. All project, preview, order, integration-status, and SSE routes require account authentication. User changes clear browser query caches and unmount live streams.
 - The user explicitly reconnected AgenticOrg as Revi's text/webhook planner. Use the configured hackathon instance and native UUID run endpoint with inputs.task; do not silently fall back to OpenAI for planning. Strictly validate completed tool-free results, and show failed or human-gated runs honestly. OpenAI through Replit AI Integrations is still the separate approved prototype generator. Keep explicit Revi approval before generation.
 
 ## Product

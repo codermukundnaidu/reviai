@@ -24,3 +24,6 @@ timeoutMs = 20000
 [userenv.shared]
 AGENTICORG_BASE_URL = "https://agenticorg.hackathon.pinelabs.com"
 AGENTICORG_PLANNER_ID = "4df6fad9-59cc-4b6b-bd26-56a08fef55bf"
+
+[objectStorage]
+defaultBucketID = "replit-objstore-6d429e41-d382-495f-a796-73e74ab8409b"

@@ -2,7 +2,7 @@
 
 The supported executable artifact is a bakery order tracker. A validated plan
 must use kind `tracker` and explicitly identify a bakery in its goal or title.
-Building only starts after the browser owner explicitly approves that plan.
+Building only starts after the signed-in account owner explicitly approves that plan.
 
 This is a fixed, supported coding workflow, **not** a public Replit Agent API,
 remote coding-agent integration, or execution of model-written server code.
@@ -37,10 +37,13 @@ The actual generated app uses same-origin JSON APIs and PostgreSQL persistence:
 - Add, list, edit, mark ready and delete, with explicit delete confirmation.
 - Version-checked edits and deletions: stale writes return 409, never overwrite.
 - Real calendar-date and bounded input validation; at most 500 orders/project.
-- Browser-owned private project, not accounts, team access or public deployment.
+- Account-owned private project; no team sharing or public deployment.
 
-Generated files and order routes require the existing HTTP-only browser-owner
-cookie. Another browser cannot retrieve either by knowing a project UUID.
+Generated files and order routes require a verified Clerk account session.
+Another account cannot retrieve either by knowing a project UUID. Signing in to
+the same account on another browser restores access. Legacy browser-owned
+projects are linked on first authenticated access from the original browser,
+without deleting projects or orders.
 App Storage objects are not public. The trusted preview uses a restrictive CSP,
 no inline script/style, no external resources, and a sandboxed iframe. Stored
 order text is rendered with `textContent`, not injected as HTML. Frame ancestors

@@ -27,7 +27,7 @@ export default function Settings() {
         <h2 className="font-display font-bold text-lg">How this is handled</h2>
         <p>AgenticOrg and webhook credentials stay on the server. AgenticOrg human review is separate from your approval to build in Revi. Pending or invalid provider results never authorize a build.</p>
         <p>After you approve a bakery tracker plan, a controlled compiler generates real HTML, CSS and JavaScript, stores the source privately, and runs source/database checks. AgenticOrg is the planner, not a coding agent.</p>
-        <p>There are no accounts. Your projects are tied to an anonymous cookie in this browser, so clearing it or switching browsers means you will not see them.</p>
+        <p>Your projects belong to your account and are private to it. Sign in on any browser to see them. Projects you started before accounts existed are moved into your account the first time you sign in; nothing is deleted.</p>
         <p>The bakery app supports saved orders with add, edit, status changes and delete. Other project kinds still use the older data-only prototypes through OpenAI. Arbitrary model-generated code is never executed.</p>
       </div>
     </div>

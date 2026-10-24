@@ -11,7 +11,7 @@ router.get("/projects/:id/builds/:buildId/files/:file", async (req, res) => {
   const project = await loadProject(String(id), res.locals.owner);
   if (!project || project.build?.id !== buildId || !isGeneratedFileName(String(file)) ||
       !project.build.files.some(f => f.name === file)) {
-    res.status(404).json({ error: "Build file not found in this browser." }); return;
+    res.status(404).json({ error: "Build file not found in your account." }); return;
   }
   if (project.build.status !== "ready" && req.query.download !== "1") {
     res.status(409).json({ error: "The generated preview is not ready." }); return;
@@ -29,7 +29,7 @@ router.get("/projects/:id/builds/:buildId/files/:file", async (req, res) => {
 router.use("/projects/:id/orders", async (req, res, next) => {
   const project = await loadProject(String(req.params.id), res.locals.owner);
   if (!project || project.build?.kind !== "bakery-order-tracker") {
-    res.status(404).json({ error: "Bakery app not found in this browser." }); return;
+    res.status(404).json({ error: "Bakery app not found in your account." }); return;
   }
   if (project.build.status !== "ready") {
     res.status(409).json({ error: "Wait until the bakery app has completed its build checks." }); return;

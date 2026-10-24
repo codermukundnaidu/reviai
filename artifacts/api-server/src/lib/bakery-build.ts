@@ -107,7 +107,7 @@ export async function buildBakeryProject(project: Project, owner: string) {
     await recordProjectEvent(project, owner, "preview_ready", `Generated app available at ${project.build.previewUrl}`);
     project.status = "ready";
     activity(project, "Bakery app ready for review", "Open the actual generated preview. Orders persist in this project's PostgreSQL records.", "awaiting-approval");
-    message(project, "assistant", "Your bakery order tracker has been built from the approved plan using the supported controlled workflow. The generated HTML, CSS and JavaScript are available in Preview, and the actual checks are in Review. You can add, edit, mark ready and delete orders; records persist after refresh. This is private to this browser's project, not a separately published app or an arbitrary coding-agent build.");
+    message(project, "assistant", "Your bakery order tracker has been built from the approved plan using the supported controlled workflow. The generated HTML, CSS and JavaScript are available in Preview, and the actual checks are in Review. You can add, edit, mark ready and delete orders; records persist after refresh. This is private to your account, not a separately published app or an arbitrary coding-agent build.");
     await recordProjectEvent(project, owner, "build_completed", "Bakery app generated, stored, checked, and ready for your review.");
   } catch (error) {
     logger.error({ errorType: error instanceof Error ? error.name : "UnknownError", projectId: project.id }, "Bakery build failed");

@@ -1,6 +1,7 @@
 import { Router, type IRouter, type Request, type Response } from "express";
 import cookieParser from "cookie-parser";
-import { randomUUID, randomBytes } from "node:crypto";
+import { randomUUID } from "node:crypto";
+import { accountAccess } from "../middlewares/account-access";
 import {
   CreateProjectBody, SendMessageBody, ReviewProjectBody, GetProjectParams,
   CreateProjectResponse, GetProjectResponse, ListProjectsResponse,
@@ -17,19 +18,14 @@ import streamRouter from "./project-stream";
 
 const router: IRouter = Router();
 router.use(cookieParser());
+router.use(accountAccess());
 const rate = new Map<string, { count: number; reset: number }>();
 router.use((req, res, next) => {
   if (!/^\/(projects|integrations)(\/|$)/.test(req.path)) { next(); return; }
   if (req.method !== "GET" && req.get("Sec-Fetch-Site") === "cross-site") {
     res.status(403).json({ error: "Cross-site writes are not allowed" }); return;
   }
-  let owner = req.cookies?.bb_session;
-  if (typeof owner !== "string" || !/^[a-f0-9]{64}$/.test(owner)) {
-    owner = randomBytes(32).toString("hex");
-    res.cookie("bb_session", owner, { httpOnly: true, sameSite: "lax",
-      secure: process.env.NODE_ENV === "production", maxAge: 365 * 86400000, path: "/" });
-  }
-  res.locals.owner = owner;
+  const owner = res.locals.owner as string;
   res.setHeader("Cache-Control", "no-store");
   if (req.method !== "GET") {
     // Bound both per-browser and per-network calls to public paid AI endpoints.
@@ -51,7 +47,7 @@ async function find(req: Request, res: Response): Promise<Project | undefined> {
   const parsed = GetProjectParams.safeParse(req.params);
   if (!parsed.success) { res.status(400).json({ error: "Invalid project ID" }); return; }
   const project = await loadProject(parsed.data.id, res.locals.owner);
-  if (!project) res.status(404).json({ error: "Project not found in this browser" });
+  if (!project) res.status(404).json({ error: "Project not found in your account" });
   return project;
 }
 function available(project: Project, res: Response) {
