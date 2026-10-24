@@ -28,6 +28,8 @@ import type {
   HealthStatus,
   IntegrationStatus,
   MessageInput,
+  PlanningInput,
+  PlanningResult,
   Project,
   ProjectInput,
   ReviewInput
@@ -59,6 +61,95 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
   }
   return result;
 };
+
+export const getPlanProjectUrl = () => {
+
+
+
+
+  return `/api/plan-project`
+}
+
+/**
+ * Server-to-server planning tool for Revi. Requires the shared webhook bearer secret, never a browser credential.
+ * @summary Understand an idea and propose a plan without building anything
+ */
+export const planProject = async (planningInput: PlanningInput, options?: Parameters<typeof customFetch>[1]): Promise<PlanningResult> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<PlanningResult>(getPlanProjectUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(planningInput)
+  }
+);}
+
+
+
+
+
+export const getPlanProjectMutationKey = () => ['planProject'] as const;
+
+export const getPlanProjectMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof planProject>>, TError,PlanProjectMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof planProject>>, TError,PlanProjectMutationVariables, TContext> => {
+
+const mutationKey = getPlanProjectMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof planProject>>, PlanProjectMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  planProject(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PlanProjectMutationResult = NonNullable<Awaited<ReturnType<typeof planProject>>>
+    export type PlanProjectMutationBody = BodyType<PlanningInput>
+    export type PlanProjectMutationError = ErrorType<void>
+    export type PlanProjectMutationVariables = {data: BodyType<PlanningInput>}
+
+    /**
+ * @summary Understand an idea and propose a plan without building anything
+ */
+export const usePlanProject = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof planProject>>, TError,PlanProjectMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof planProject>>,
+        TError,
+        PlanProjectMutationVariables,
+        TContext
+      > => {
+      return useMutation(getPlanProjectMutationOptions(options), queryClient);
+    }
 
 export const getListProjectsUrl = () => {
 

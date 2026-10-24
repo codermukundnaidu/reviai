@@ -31,7 +31,8 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/api", router);
 const errors: ErrorRequestHandler = (err, req, res, _next) => {
   req.log.error({ err }, "Request failed");
-  res.status(err.status === 413 ? 413 : 500).json({ error: err.status === 413 ? "Request is too large" : "Something went wrong. Please try again." });
+  const status = err.status === 413 ? 413 : err.status === 400 ? 400 : 500;
+  res.status(status).json({ error: status === 413 ? "Request is too large" : status === 400 ? "Invalid request body" : "Something went wrong. Please try again." });
 };
 app.use(errors);
 

@@ -5,6 +5,84 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
+/**
+ * The user's chosen technical explanation level. Ask if not yet known.
+ */
+export type PlanningInputExperienceLevel = typeof PlanningInputExperienceLevel[keyof typeof PlanningInputExperienceLevel];
+
+
+export const PlanningInputExperienceLevel = {
+  Beginner: 'Beginner',
+  Intermediate: 'Intermediate',
+  Advanced: 'Advanced',
+  Pro: 'Pro',
+} as const;
+
+export interface PlanningInput {
+  /**
+     * The user's goal and desired outcome, summarized after they have finished explaining.
+     * @minLength 1
+     * @maxLength 10000
+     */
+  idea: string;
+  /** The user's chosen technical explanation level. Ask if not yet known. */
+  experience_level: PlanningInputExperienceLevel;
+  /**
+     * Relevant conversation summary including audience, workflow, constraints, prior clarification answers, and explicit unknowns. Never invent facts.
+     * @maxLength 20000
+     */
+  context: string;
+  /**
+     * Optional explicit user-stated constraints. Omit when unknown; an empty array does not mean the user confirmed no constraints.
+     * @maxItems 12
+     * @items.minLength 1
+     * @items.maxLength 1000
+     */
+  constraints?: string[];
+}
+
+export type PlanningResultStatus = typeof PlanningResultStatus[keyof typeof PlanningResultStatus];
+
+
+export const PlanningResultStatus = {
+  needs_clarification: 'needs_clarification',
+  plan_ready: 'plan_ready',
+} as const;
+
+export interface Requirements {
+  goal: string;
+  audience: string;
+  constraints: string[];
+  questions: string[];
+}
+
+export type PlanKind = typeof PlanKind[keyof typeof PlanKind];
+
+
+export const PlanKind = {
+  tracker: 'tracker',
+  checklist: 'checklist',
+  calculator: 'calculator',
+  information: 'information',
+} as const;
+
+export interface Plan {
+  title: string;
+  kind: PlanKind;
+  rationale: string;
+  steps: string[];
+}
+
+export interface PlanningResult {
+  status: PlanningResultStatus;
+  reply: string;
+  title: string;
+  requirements: Requirements;
+  plan: Plan | null;
+  /** Always true. This endpoint never authorizes or starts a build. */
+  approval_required: boolean;
+}
+
 export type ProjectInputLevel = typeof ProjectInputLevel[keyof typeof ProjectInputLevel];
 
 
@@ -62,30 +140,6 @@ export interface Activity {
   detail: string;
   status: ActivityStatus;
   createdAt: string;
-}
-
-export interface Requirements {
-  goal: string;
-  audience: string;
-  constraints: string[];
-  questions: string[];
-}
-
-export type PlanKind = typeof PlanKind[keyof typeof PlanKind];
-
-
-export const PlanKind = {
-  tracker: 'tracker',
-  checklist: 'checklist',
-  calculator: 'calculator',
-  information: 'information',
-} as const;
-
-export interface Plan {
-  title: string;
-  kind: PlanKind;
-  rationale: string;
-  steps: string[];
 }
 
 export type PrototypeKind = typeof PrototypeKind[keyof typeof PrototypeKind];

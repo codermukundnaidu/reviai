@@ -43,6 +43,8 @@ A goal-first AI developer companion for non-programmers, with approved plans, sa
 - Supported prototype kinds: tracker, checklist, sum/average calculator, information browser. Interactive preview changes stay in localStorage; conversations and plans are in PostgreSQL.
 - Inspect backend-persisted activity, actual structural checks, review decisions and project history.
 - Voice uses the official ElevenLabs public-agent widget, loaded on demand from the home/project microphone controls. Calls remain separate from saved project chat and must not bypass explicit plan approvals. No ElevenLabs API key is required for this public embed.
+- Revi must call `understand_and_plan_project` only once the user's idea is sufficiently understood, not after every sentence. Acknowledgements and approvals do not trigger replanning; meaningful revisions or answered clarification questions can.
+- Planning webhook authentication is server-to-server only. Never expose `PLANNING_WEBHOOK_SECRET` to the browser or make planning calls count as approval/build actions. Live ElevenLabs tool installation is separate from implementing the API.
 
 ## User preferences
 

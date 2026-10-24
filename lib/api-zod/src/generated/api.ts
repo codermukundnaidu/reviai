@@ -8,6 +8,47 @@
 import * as zod from 'zod';
 
 
+/**
+ * Server-to-server planning tool for Revi. Requires the shared webhook bearer secret, never a browser credential.
+ * @summary Understand an idea and propose a plan without building anything
+ */
+export const planProjectBodyIdeaMax = 10000;
+
+export const planProjectBodyContextMax = 20000;
+
+export const planProjectBodyConstraintsItemMax = 1000;
+
+export const planProjectBodyConstraintsMax = 12;
+
+
+
+export const PlanProjectBody = zod.object({
+  "idea": zod.string().min(1).max(planProjectBodyIdeaMax).describe('The user\'s goal and desired outcome, summarized after they have finished explaining.'),
+  "experience_level": zod.enum(['Beginner', 'Intermediate', 'Advanced', 'Pro']).describe('The user\'s chosen technical explanation level. Ask if not yet known.'),
+  "context": zod.string().max(planProjectBodyContextMax).describe('Relevant conversation summary including audience, workflow, constraints, prior clarification answers, and explicit unknowns. Never invent facts.'),
+  "constraints": zod.array(zod.string().min(1).max(planProjectBodyConstraintsItemMax)).max(planProjectBodyConstraintsMax).optional().describe('Optional explicit user-stated constraints. Omit when unknown; an empty array does not mean the user confirmed no constraints.')
+})
+
+export const PlanProjectResponse = zod.object({
+  "status": zod.enum(['needs_clarification', 'plan_ready']),
+  "reply": zod.string(),
+  "title": zod.string(),
+  "requirements": zod.object({
+  "goal": zod.string(),
+  "audience": zod.string(),
+  "constraints": zod.array(zod.string()),
+  "questions": zod.array(zod.string())
+}),
+  "plan": zod.union([zod.object({
+  "title": zod.string(),
+  "kind": zod.enum(['tracker', 'checklist', 'calculator', 'information']),
+  "rationale": zod.string(),
+  "steps": zod.array(zod.string())
+}),zod.null()]),
+  "approval_required": zod.boolean().describe('Always true. This endpoint never authorizes or starts a build.')
+})
+
+
 export const ListProjectsResponseItem = zod.object({
   "id": zod.string(),
   "title": zod.string(),

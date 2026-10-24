@@ -1,0 +1,47 @@
+{
+  "tool_config": {
+    "type": "webhook",
+    "name": "understand_and_plan_project",
+    "description": "Understand the user's goal, identify missing information, and return a proposed solution and build plan. Call only after the user has finished explaining and you know their goal, audience, current workflow, experience level, and important constraints or their explicit confirmation of none. Do not call after every sentence, acknowledgement, or unchanged requirement. Include the whole relevant conversation summary. Returns either one missing-information question or a proposed plan requiring explicit approval; never starts a build.",
+    "response_timeout_secs": 60,
+    "execution_mode": "immediate",
+    "api_schema": {
+      "url": "REPLACE_WITH_VERIFIED_PRODUCTION_URL/api/plan-project",
+      "method": "POST",
+      "content_type": "application/json",
+      "request_headers": {
+        "Authorization": {
+          "secret_id": "REPLACE_WITH_ELEVENLABS_AUTHORIZATION_SECRET_ID"
+        }
+      },
+      "request_body_schema": {
+        "type": "object",
+        "description": "A settled idea and faithful conversation summary. Exact backend fields only.",
+        "required": ["idea", "experience_level", "context"],
+        "properties": {
+          "idea": {
+            "type": "string",
+            "description": "The user's real goal and desired outcome, not only the latest sentence. Required, 1–10,000 characters. Do not invent missing information."
+          },
+          "experience_level": {
+            "type": "string",
+            "enum": ["Beginner", "Intermediate", "Advanced", "Pro"],
+            "description": "The user's chosen technical explanation level. Ask conversationally if unknown before calling this tool."
+          },
+          "context": {
+            "type": "string",
+            "description": "Faithful summary of the relevant conversation: audience, workflow, constraints, earlier clarification answers, and explicit unknowns. Required, up to 20,000 characters. Never include secrets."
+          },
+          "constraints": {
+            "type": "array",
+            "description": "Optional explicit user-stated constraints; maximum 12 strings, each 1–1,000 characters. Omit if unknown. Empty does not mean the user explicitly confirmed no constraints.",
+            "items": {
+              "type": "string",
+              "description": "One explicitly stated constraint."
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -11,6 +11,30 @@ tags:
   - name: health
     description: Health operations
 paths:
+  /plan-project:
+    post:
+      operationId: planProject
+      summary: Understand an idea and propose a plan without building anything
+      description: Server-to-server planning tool for Revi. Requires the shared webhook bearer secret, never a browser credential.
+      security:
+        - PlanningWebhookAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/PlanningInput" }
+      responses:
+        "200":
+          description: Either one clarification question or a proposed plan requiring explicit approval
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PlanningResult" }
+        "400": { description: Invalid request }
+        "401": { description: Missing or incorrect webhook credentials }
+        "415": { description: JSON content type required }
+        "429": { description: Planning request or concurrency limit reached }
+        "502": { description: Planner failed or returned an invalid response }
+        "503": { description: Planning credentials or AI service not configured }
   /projects:
     get:
       operationId: listProjects
@@ -110,7 +134,51 @@ paths:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
 components:
+  securitySchemes:
+    PlanningWebhookAuth:
+      type: http
+      scheme: bearer
+      description: PLANNING_WEBHOOK_SECRET stored on the server and in ElevenLabs secure tool authentication.
   schemas:
+    PlanningInput:
+      type: object
+      additionalProperties: false
+      required: [idea, experience_level, context]
+      properties:
+        idea:
+          type: string
+          minLength: 1
+          maxLength: 10000
+          description: The user's goal and desired outcome, summarized after they have finished explaining.
+        experience_level:
+          type: string
+          enum: [Beginner, Intermediate, Advanced, Pro]
+          description: The user's chosen technical explanation level. Ask if not yet known.
+        context:
+          type: string
+          maxLength: 20000
+          description: Relevant conversation summary including audience, workflow, constraints, prior clarification answers, and explicit unknowns. Never invent facts.
+        constraints:
+          type: array
+          maxItems: 12
+          description: Optional explicit user-stated constraints. Omit when unknown; an empty array does not mean the user confirmed no constraints.
+          items: { type: string, minLength: 1, maxLength: 1000 }
+    PlanningResult:
+      type: object
+      additionalProperties: false
+      required: [status, reply, title, requirements, plan, approval_required]
+      properties:
+        status: { type: string, enum: [needs_clarification, plan_ready] }
+        reply: { type: string }
+        title: { type: string }
+        requirements: { $ref: "#/components/schemas/Requirements" }
+        plan:
+          anyOf:
+            - { $ref: "#/components/schemas/Plan" }
+            - { type: "null" }
+        approval_required:
+          type: boolean
+          description: Always true. This endpoint never authorizes or starts a build.
     ProjectInput:
       type: object
       required: [level]

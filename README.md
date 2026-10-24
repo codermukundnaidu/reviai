@@ -21,6 +21,8 @@ BuildBuddy helps someone with no coding experience describe a goal, clarify who 
 ### ElevenLabs voice configuration
 
 The public agent is linked in `artifacts/buildbuddy/src/components/voice-agent.tsx`. No API key is exposed or needed for this public widget. The widget only loads after a user clicks the voice control; starting a call is a separate explicit action. Agent authentication must remain compatible with public widget access. Restrict allowed domains in the agent’s ElevenLabs Security settings to this app’s preview and published domains. If a call is blocked, check those settings, microphone permissions, and the ElevenLabs account’s availability/quota. Integration status reports configuration, not live call health. Browser microphone restrictions inside an embedded preview may require opening the app in a separate tab.
+
+The protected `POST /api/plan-project` endpoint supports Revi's planning webhook. See [the setup and exact API contract](docs/elevenlabs-planning.md), [tool configuration template](docs/elevenlabs-planning-tool.template.json), and [Revi call-timing instructions](docs/revi-planning-prompt.md). Live tool registration requires ElevenLabs account access, a securely configured shared webhook secret, and a published backend URL.
 - **AgenticOrg:** a server-side adapter point is prepared. It needs a compatible HTTPS endpoint and credentials; see `docs/agenticorg.md`. The native provider contract has not been verified.
 - Prototypes do not send messages, take payments, book appointments, connect external accounts, execute arbitrary code or deploy themselves.
 - There is no account login, team sharing or cross-device access. Keep the browser cookie to retain access to your saved projects.
