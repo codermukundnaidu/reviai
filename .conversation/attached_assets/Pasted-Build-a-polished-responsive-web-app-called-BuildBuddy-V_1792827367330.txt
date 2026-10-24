@@ -1,0 +1,36 @@
+Build a polished, responsive web app called BuildBuddy Voice.
+
+PRODUCT VISION
+BuildBuddy is a friendly AI developer companion for people who have never written code. It should discover what users are trying to accomplish before recommending what to build. It must not assume every idea requires a website.
+
+DESIGN
+Create a premium, modern, warm interface with a dark charcoal and off-white palette, subtle green accents, rounded panels, clear typography, and minimal animation.
+
+CORE SCREENS
+1. Welcome screen with Beginner, Intermediate, Advanced, and Pro experience levels.
+2. Conversation workspace with a chat transcript, voice-agent integration placeholder, and text input.
+3. Project understanding panel displaying the user's goal, intended audience, constraints, and unresolved questions.
+4. Proposed solution panel with a project plan and an explicit Approve Plan action.
+5. Live activity timeline showing actual workflow status.
+6. Preview panel for a supported generated prototype.
+7. Review screen showing test results, approval status, and project history.
+
+CONVERSATION BEHAVIOR
+The assistant must understand ordinary, incomplete, non-technical language. Ask one useful follow-up question at a time. Adapt explanations to the selected experience level. Respectfully challenge decisions that conflict with the user's goals, explain why, and offer alternatives. Never pretend to have performed an action that has not occurred.
+
+WORKFLOW
+Capture the idea, clarify the goal, recommend an appropriate solution, obtain approval, generate a supported interactive prototype, run available tests, and show the actual results.
+
+AGENTICORG
+Prepare a backend integration point for a real AgenticOrg agent. Pass structured user requirements to the agent and display its returned result. Do not fabricate agent responses or execution logs.
+
+LIVE VISIBILITY
+Create a timeline driven by backend events. Clearly distinguish completed, running, failed, and awaiting-approval actions.
+
+SAFETY
+Require approval before consequential actions. Never expose API secrets in frontend code. Do not execute arbitrary generated code in the user's browser or server without isolation.
+
+BUILD PRIORITY
+Make one complete user journey work reliably before adding extra features. Use a real persistence layer if time allows. Ensure the app runs and can be publicly deployed.
+
+Begin implementation immediately. Do not stop at a design mockup. Report which features are actually working, which integrations need credentials, and the exact steps needed to run and deploy the app.

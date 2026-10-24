@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "BuildBuddy Voice"
+description = "A friendly developer companion that clarifies ideas, recommends the right solution, requests approval, and creates safe interactive prototypes with real workflow visibility."
+version = "1.0.0"
+id = "artifacts/buildbuddy"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 23888
+
+[services.development]
+run = "pnpm --filter @workspace/buildbuddy run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/buildbuddy", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/buildbuddy/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "23888"
+BASE_PATH = "/"

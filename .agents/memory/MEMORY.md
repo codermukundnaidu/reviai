@@ -1,0 +1,1 @@
+- [AI response contracts](ai-response-contracts.md) — valid JSON alone is insufficient for workflow-state responses; preserve strict structured outputs plus validation.

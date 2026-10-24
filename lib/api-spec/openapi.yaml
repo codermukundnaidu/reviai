@@ -11,6 +11,91 @@ tags:
   - name: health
     description: Health operations
 paths:
+  /projects:
+    get:
+      operationId: listProjects
+      responses:
+        "200":
+          description: Saved projects in this browser session
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: "#/components/schemas/Project" } }
+    post:
+      operationId: createProject
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ProjectInput" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Project" }
+  /projects/{id}:
+    parameters:
+      - { name: id, in: path, required: true, schema: { type: string } }
+    get:
+      operationId: getProject
+      responses:
+        "200":
+          description: Project
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Project" }
+  /projects/{id}/messages:
+    parameters:
+      - { name: id, in: path, required: true, schema: { type: string } }
+    post:
+      operationId: sendMessage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/MessageInput" }
+      responses:
+        "200":
+          description: Updated project with assistant response
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Project" }
+  /projects/{id}/approve:
+    parameters:
+      - { name: id, in: path, required: true, schema: { type: string } }
+    post:
+      operationId: approvePlan
+      responses:
+        "200":
+          description: Approved and queued generation
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Project" }
+  /projects/{id}/review:
+    parameters:
+      - { name: id, in: path, required: true, schema: { type: string } }
+    post:
+      operationId: reviewProject
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ReviewInput" }
+      responses:
+        "200":
+          description: Review saved
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Project" }
+  /integrations:
+    get:
+      operationId: getIntegrations
+      responses:
+        "200":
+          description: Real integration configuration
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/IntegrationStatus" }
   /healthz:
     get:
       operationId: healthCheck
@@ -26,6 +111,93 @@ paths:
                 $ref: "#/components/schemas/HealthStatus"
 components:
   schemas:
+    ProjectInput:
+      type: object
+      required: [level]
+      properties:
+        level: { type: string, enum: [Beginner, Intermediate, Advanced, Pro] }
+    MessageInput:
+      type: object
+      required: [content]
+      properties:
+        content: { type: string, minLength: 1, maxLength: 10000 }
+    ReviewInput:
+      type: object
+      required: [approved]
+      properties:
+        approved: { type: boolean }
+    Message:
+      type: object
+      required: [id, role, content, createdAt]
+      properties:
+        id: { type: string }
+        role: { type: string, enum: [user, assistant] }
+        content: { type: string }
+        createdAt: { type: string }
+    Activity:
+      type: object
+      required: [id, title, detail, status, createdAt]
+      properties:
+        id: { type: string }
+        title: { type: string }
+        detail: { type: string }
+        status: { type: string, enum: [completed, running, failed, awaiting-approval] }
+        createdAt: { type: string }
+    Requirements:
+      type: object
+      required: [goal, audience, constraints, questions]
+      properties:
+        goal: { type: string }
+        audience: { type: string }
+        constraints: { type: array, items: { type: string } }
+        questions: { type: array, items: { type: string } }
+    Plan:
+      type: object
+      required: [title, kind, rationale, steps]
+      properties:
+        title: { type: string }
+        kind: { type: string, enum: [tracker, checklist, calculator, information] }
+        rationale: { type: string }
+        steps: { type: array, items: { type: string } }
+    Prototype:
+      type: object
+      required: [kind, title, description, items]
+      properties:
+        kind: { type: string, enum: [tracker, checklist, calculator, information] }
+        title: { type: string }
+        description: { type: string }
+        items: { type: array, items: { type: string } }
+    TestResult:
+      type: object
+      required: [name, passed, detail]
+      properties:
+        name: { type: string }
+        passed: { type: boolean }
+        detail: { type: string }
+    Project:
+      type: object
+      required: [id, title, level, status, requirements, messages, activities, tests, reviewApproved, createdAt, updatedAt]
+      properties:
+        id: { type: string }
+        title: { type: string }
+        level: { type: string, enum: [Beginner, Intermediate, Advanced, Pro] }
+        status: { type: string, enum: [discovering, awaiting-approval, building, ready, failed] }
+        requirements: { $ref: "#/components/schemas/Requirements" }
+        plan: { $ref: "#/components/schemas/Plan" }
+        prototype: { $ref: "#/components/schemas/Prototype" }
+        messages: { type: array, items: { $ref: "#/components/schemas/Message" } }
+        activities: { type: array, items: { $ref: "#/components/schemas/Activity" } }
+        tests: { type: array, items: { $ref: "#/components/schemas/TestResult" } }
+        reviewApproved: { type: boolean }
+        createdAt: { type: string }
+        updatedAt: { type: string }
+    IntegrationStatus:
+      type: object
+      required: [ai, agenticOrg, voice]
+      properties:
+        ai: { type: boolean }
+        agenticOrg: { type: boolean }
+        voice: { type: boolean }
     HealthStatus:
       type: object
       properties:
