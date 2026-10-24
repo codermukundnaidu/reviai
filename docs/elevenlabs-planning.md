@@ -82,7 +82,7 @@ Use `docs/elevenlabs-planning-tool.template.json` as the tool creation body. It 
 - Authorization header: ElevenLabs secret reference, not literal credentials
 - Response timeout: 60 seconds (backend model request uses a 45-second timeout without retries)
 
-Replace the template URL and secret reference with the verified production URL and the ElevenLabs-created secret ID, never with a raw secret. ElevenLabs' parameter schema supports names/types/enums; its descriptions carry the length limits that the backend enforces.
+The verified published origin is `https://reviai.replit.app`; the template uses `https://reviai.replit.app/api/plan-project`. The live deployment checked during implementation still served the earlier code and returned 404 for this route, so the latest code must be republished after secure configuration. Replace the secret reference with the ElevenLabs-created secret ID, never with a raw secret. If the deployment domain changes, update the URL using verified publishing metadata. ElevenLabs' parameter schema supports names/types/enums; its descriptions carry the length limits that the backend enforces.
 
 Create the tool in the ElevenLabs workspace, then attach its ID to Revi's existing agent `agent_5401m5pfy3nxezer03ar2rp5926v`. Preserve all existing tool IDs and the agent's current settings. Append `docs/revi-planning-prompt.md` to the existing system prompt rather than replacing it.
 

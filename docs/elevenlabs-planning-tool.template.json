@@ -6,7 +6,7 @@
     "response_timeout_secs": 60,
     "execution_mode": "immediate",
     "api_schema": {
-      "url": "REPLACE_WITH_VERIFIED_PRODUCTION_URL/api/plan-project",
+      "url": "https://reviai.replit.app/api/plan-project",
       "method": "POST",
       "content_type": "application/json",
       "request_headers": {
