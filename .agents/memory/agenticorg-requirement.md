@@ -24,6 +24,17 @@ AgenticOrg's own human review.
 questions, provider HITL, invalid results, or incomplete requirements must not
 authorize a build. Automatic build approval does not publish or deploy.
 
+The public Python distribution's documented client is `AgenticOrg`; the
+inspected package does not export an `Agent` class or document
+`verification_mode`/`fail_safe` options.
+
+**Why:** The user supplied a snippet claiming those options automatically skip
+human review, but the published package contents did not contain that API.
+
+**How to apply:** Do not wire an unverified SDK example into Revi or claim it
+changes AgenticOrg's HITL policy. Recheck the official package/docs before
+adopting a later or private SDK interface.
+
 For this project's AgenticOrg tests, use the user-provided hackathon instance:
 `https://agenticorg.hackathon.pinelabs.com`, not the SDK's default
 `https://app.agenticorg.ai`.
