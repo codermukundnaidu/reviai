@@ -2,7 +2,7 @@
 
 ## Implemented backend
 
-`POST /api/plan-project` is a server-to-server JSON endpoint. It requires the same native AgenticOrg product planner used by BuildBuddy's text conversations, with a configured output schema and independent server-side shape/workflow validation. There is no OpenAI planning fallback. Provisioning is currently blocked by AgenticOrg authorization; see `docs/agenticorg.md`.
+`POST /api/plan-project` is a server-to-server JSON endpoint. It uses the same OpenAI planner as BuildBuddy's text conversations through Replit AI Integrations, with strict JSON Schema output and independent server-side shape/workflow validation. AgenticOrg is not used or required.
 
 It does **not** save a project, start generation, approve a proposal, or deploy anything. The structured response goes back to the ElevenLabs tool caller. The current voice widget can discuss that response; it does not automatically import it into the saved project workspace.
 
@@ -73,7 +73,7 @@ The endpoint allows three concurrent model calls and 20 new requests per minute 
 
 The live tool is installed on Revi as `tool_1201m5phma7nfvqtfzjgfxrg3bfa`, with a secure ElevenLabs secret reference and the managed planning instructions appended to the existing prompt. Tool membership, POST URL, parameter names, required fields, experience-level enum, secure header reference, and call-timing instructions were verified by reading back the provider configuration.
 
-`docs/elevenlabs-planning-tool.template.json` remains a reusable template, not a copy containing credentials. Earlier successful model checks used the old planner; they do not verify the now-mandatory AgenticOrg path. Until an authorized native planner is configured, valid authenticated planning requests return 503 rather than a substitute plan. At the latest published check this route returned 404; publishing and a successful native planner check are both required before live voice use. A live voice conversation has not yet been tested.
+`docs/elevenlabs-planning-tool.template.json` remains a reusable template, not a copy containing credentials. Live OpenAI tests passed for both complete requirements (validated proposal) and incomplete requirements (exactly one question). At the latest published check this route returned 404; republish the updated backend before live voice use. A live voice conversation has not yet been tested, and voice results are not automatically saved into browser-owned projects.
 
 - Name: `understand_and_plan_project`
 - Method: `POST`

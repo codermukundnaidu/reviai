@@ -1,2 +1,2 @@
 - [AI response contracts](ai-response-contracts.md) — valid JSON alone is insufficient for workflow-state responses; preserve strict structured outputs plus validation.
-- [Mandatory AgenticOrg planning](agenticorg-requirement.md) — AgenticOrg is required for Revi; no substitute planner. Shadow status alone does not prevent test runs.
+- [Planning provider decision](agenticorg-requirement.md) — user removed AgenticOrg after authorization failures; use the configured AI integration, preserving approval and validation.

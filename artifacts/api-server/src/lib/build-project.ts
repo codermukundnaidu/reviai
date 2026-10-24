@@ -5,8 +5,7 @@ import { logger } from "./logger";
 // All mutations for a project are serialized within the single API process.
 export const busyProjects = new Set<string>();
 export async function buildProject(project: Project, owner: string): Promise<void> {
-  let current = activity(project, "Generating prototype", process.env.AGENTICORG_URL && process.env.AGENTICORG_API_KEY
-    ? "Sending approved structured requirements to AgenticOrg." : "Generating safe prototype data with OpenAI. AgenticOrg is not connected.", "running");
+  let current = activity(project, "Generating prototype", "Generating safe prototype data with OpenAI through Replit AI Integrations.", "running");
   try {
     await saveProject(project, owner);
     const prototype = await generatePrototype(project);

@@ -35,7 +35,7 @@ A goal-first AI developer companion for non-programmers, with approved plans, sa
 - Publish on **Reserved VM with a single API process**, not multiple Autoscale instances: this release has process-local job coordination and background provider calls. A restart marks interrupted work failed and requires explicit retry.
 - Prototype generation returns only validated data for four prebuilt React renderers. This intentionally limits scope to avoid executing untrusted model code.
 - No accounts were requested. Projects are owned by an opaque, httpOnly browser cookie, not shared across devices; clearing cookies loses access.
-- AgenticOrg is mandatory for conversation and product planning; never substitute an OpenAI planner. Native planner provisioning is currently blocked by provider authorization. No AgenticOrg success or execution log may be fabricated.
+- The user removed the AgenticOrg requirement. Conversation, webhook planning, and safe prototype generation now use OpenAI through Replit AI Integrations, with strict structured output and independent validation. Do not call AgenticOrg or require its credentials. Keep explicit user approval before generation.
 
 ## Product
 

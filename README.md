@@ -5,7 +5,7 @@ BuildBuddy helps someone with no coding experience describe a goal, clarify who 
 ## What is implemented
 
 - Beginner, Intermediate, Advanced and Pro experience levels.
-- Mandatory native AgenticOrg planning for text and voice, one follow-up question at a time. This path is implemented but currently blocked by AgenticOrg authorization; no substitute planner is used.
+- OpenAI planning through Replit AI Integrations for text and the voice webhook, one follow-up question at a time. Strict structured output and independent validation; no AgenticOrg dependency.
 - PostgreSQL persistence for browser-owned conversations, understanding, plans, events, check results and review decisions.
 - Explicit plan approval before generation; the UI polls backend-persisted events.
 - Four supported prebuilt interactive renderers: tracker, checklist, sum/average calculator and information browser.
@@ -22,8 +22,8 @@ BuildBuddy helps someone with no coding experience describe a goal, clarify who 
 
 The public agent is linked in `artifacts/buildbuddy/src/components/voice-agent.tsx`. No API key is exposed or needed for this public widget. The widget only loads after a user clicks the voice control; starting a call is a separate explicit action. Agent authentication must remain compatible with public widget access. Restrict allowed domains in the agent’s ElevenLabs Security settings to this app’s preview and published domains. If a call is blocked, check those settings, microphone permissions, and the ElevenLabs account’s availability/quota. Integration status reports configuration, not live call health. Browser microphone restrictions inside an embedded preview may require opening the app in a separate tab.
 
-The protected `POST /api/plan-project` endpoint supports Revi's planning webhook. The ElevenLabs tool and call-timing instructions are installed, with server-side shared-secret authentication. See [the setup and exact API contract](docs/elevenlabs-planning.md), [tool configuration template](docs/elevenlabs-planning-tool.template.json), and [Revi call-timing instructions](docs/revi-planning-prompt.md). The native AgenticOrg path must pass its live checks before use. Earlier real-model checks used the previous planner and do not verify this path. Republish after configuration because the last checked production build did not include the route.
-- **AgenticOrg:** mandatory, native API contract verified against official source. Dedicated tool-free planner creation returned 403; a subsequent permission probe returned 401. No native planning success is claimed. See `docs/agenticorg.md` for the provisioning template and authorization requirements.
+The protected `POST /api/plan-project` endpoint supports Revi's planning webhook. The ElevenLabs tool and call-timing instructions are installed, with server-side shared-secret authentication. See [the setup and exact API contract](docs/elevenlabs-planning.md), [tool configuration template](docs/elevenlabs-planning-tool.template.json), and [Revi call-timing instructions](docs/revi-planning-prompt.md). The endpoint now uses OpenAI, not AgenticOrg. Republish to update the live webhook backend; the last checked published build did not include the route.
+- **AgenticOrg:** removed from active planning and generation at the user's request. Its old adapter and provisioning templates are historical, unused code.
 - Prototypes do not send messages, take payments, book appointments, connect external accounts, execute arbitrary code or deploy themselves.
 - There is no account login, team sharing or cross-device access. Keep the browser cookie to retain access to your saved projects.
 
@@ -45,13 +45,11 @@ Required server configuration:
 | Setting | Purpose |
 | --- | --- |
 | `DATABASE_URL` | Managed PostgreSQL connection |
-| `AGENTICORG_API_KEY` | Authorized AgenticOrg credential, server-only |
-| `AGENTICORG_PLANNER_ID` | UUID of the dedicated tool-free product planner |
 | `PLANNING_WEBHOOK_SECRET` | Server-to-server ElevenLabs webhook authentication |
-| `AI_INTEGRATIONS_OPENAI_BASE_URL` | Legacy data-only prototype generator endpoint, not the planner |
-| `AI_INTEGRATIONS_OPENAI_API_KEY` | Legacy data-only prototype generator credential, not a planning fallback |
+| `AI_INTEGRATIONS_OPENAI_BASE_URL` | Replit AI Integrations endpoint for planning and prototypes |
+| `AI_INTEGRATIONS_OPENAI_API_KEY` | Server-only AI Integrations credential |
 
-The legacy data-only prototype generator uses Replit AI Integrations. It is not a coding agent or a real bakery-app builder. Product planning requires AgenticOrg and fails explicitly until its configuration and authorization are ready. All credentials remain server-only.
+Planning and data-only prototype generation use Replit AI Integrations for OpenAI access. No new user-provided key is required; usage is billed to Replit credits. This is not a coding agent or a real bakery-app builder. All credentials remain server-only, and explicit approval is required before generating a prototype.
 
 Development checks:
 

@@ -3,8 +3,7 @@ import { useGetIntegrations } from '@workspace/api-client-react';
 export default function Settings() {
   const { data, isLoading, isError, refetch } = useGetIntegrations();
   const rows = [
-    { id: 'ai', name: 'Planning provider', on: data?.ai, yes: 'AgenticOrg is configured for conversation and planning. Every response is validated; no substitute planner is used.', no: 'AgenticOrg is required. Planning is blocked until an authorized key and a dedicated planner are configured. There is no OpenAI planning fallback.' },
-    { id: 'agenticorg', name: 'AgenticOrg planner configuration', on: data?.agenticOrg, yes: 'A server-only key and planner ID are set. Configuration is not a health check: execution permissions, tool-free settings, and returned plans are checked on each request.', no: 'Not configured. AgenticOrg must authorize access to a tool-free product planner before Revi can propose a plan.' },
+    { id: 'ai', name: 'OpenAI planning & prototypes', on: data?.ai, yes: 'Configured through Replit AI Integrations. Plans use strict structured output and server-side validation. Building requires your explicit approval. AgenticOrg is not used.', no: 'Replit AI Integrations is not configured. Planning and prototype generation need server-side OpenAI access.' },
     { id: 'voice', name: 'ElevenLabs voice', on: data?.voice, yes: 'Public agent linked. Choose Talk with voice, then start a call in the ElevenLabs panel. Microphone permission is required. Calls are separate from saved project chat; this status indicates configuration, not a live call health check.', no: 'Voice agent is not configured.' },
   ];
   return (
@@ -26,7 +25,7 @@ export default function Settings() {
       </div>
       <div className="rounded-2xl bg-sidebar text-sidebar-foreground p-6 space-y-3 text-sm leading-relaxed">
         <h2 className="font-display font-bold text-lg">How this is handled</h2>
-        <p>AgenticOrg credentials are configured on the server only. They are never entered, stored or shown in this browser.</p>
+        <p>AI and webhook credentials stay on the server. No AgenticOrg integration or key is required. AI usage is billed to your Replit credits.</p>
         <p>There are no accounts. Your projects are tied to an anonymous cookie in this browser, so clearing it or switching browsers means you will not see them.</p>
         <p>Prototypes come in four safe kinds: tracker, checklist, calculator and information. They are prebuilt screens that only display the data returned to them. Code or HTML written by the model is never run.</p>
       </div>

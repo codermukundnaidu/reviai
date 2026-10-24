@@ -1,17 +1,19 @@
 ---
-name: Mandatory AgenticOrg planning
-description: User-required provider and external lifecycle distinction for Revi product planning
+name: Planning provider decision
+description: Current provider decision and lessons from the retired AgenticOrg setup
 ---
 
-AgenticOrg is mandatory for Revi's product planning. Do not substitute another
-planner or silently fall back to OpenAI.
+Do not require or call AgenticOrg for Revi. Use the configured Replit AI
+integration for planning and safe prototype generation.
 
-**Why:** The user selected configuring AgenticOrg before the bakery-builder MVP
-and repeated, "AgenticOrg is mandatory."
+**Why:** After repeated AgenticOrg authorization failures, the user explicitly
+changed the requirement: "do without agenticorg integration". This supersedes
+their earlier mandatory-provider instruction.
 
-**How to apply:** Fail explicitly when native AgenticOrg authorization,
-configuration, execution, or output validation fails. Keep planning, explicit
-user approval, and implementation as separate stages.
+**How to apply:** Do not reintroduce AgenticOrg setup or permission requests.
+Keep provider-enforced structured output, server validation, explicit user
+approval, and implementation as separate stages. The remaining notes are
+historical guidance only if the user explicitly requests AgenticOrg again.
 
 Shadow status alone does not mean an AgenticOrg agent cannot run.
 

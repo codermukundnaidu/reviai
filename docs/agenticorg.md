@@ -1,4 +1,11 @@
-# Mandatory AgenticOrg product planner
+# Historical AgenticOrg setup — not active
+
+The user removed this integration after authorization failures. Active text
+planning, voice webhook planning, and prototype generation use OpenAI through
+Replit AI Integrations. AgenticOrg credentials are not required or read by those
+paths. The material below is an archived setup reference, not current instructions.
+
+## Previous integration design
 
 AgenticOrg is mandatory for Revi's product planning. Both text conversations and
 `POST /api/plan-project` use the native AgenticOrg agent-run API. They do not fall
