@@ -39,3 +39,15 @@ Mapping. For denied configuration writes, have an authorized administrator
 review server-side credential policy or apply the planner configuration through
 their authenticated console. Never suggest nonexistent permission checkboxes or
 grant broad administrator scope as a default workaround.
+
+Evaluate execution access separately from configuration-write access.
+
+**Why:** The native machine credential could execute the tool-free planner even
+while configuration PATCH requests were denied. Planning can still pause for
+human review under confidence/completeness policy despite making no tool calls.
+
+**How to apply:** A configuration-write 403 does not prove that planning cannot
+run. Use a bounded, authorized test of an already safe agent; accept only
+completed, validated results. A human-gated proposal is pending review, not a
+successful completed plan and never permission to build. Preserve the provider's
+review gate rather than lowering thresholds or changing routes to bypass it.
