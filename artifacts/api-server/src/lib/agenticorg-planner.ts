@@ -108,7 +108,7 @@ Request data: ${JSON.stringify(input)}`,
   }
   if (result.status === "hitl_triggered") {
     throw new AgenticOrgPlanningError("review_required",
-      `AgenticOrg requires human review for run ${result.run_id}. Review it at ${origin}/dashboard/approvals. This is not Revi's build approval. Revi cannot automatically retrieve the resumed result with the current run-only access; no plan or build was accepted.`);
+      `AgenticOrg requires human review for run ${result.run_id}. Review it at ${origin}/dashboard/approvals. This is not Revi's build approval. Revi cannot retrieve the resumed result with the current run-only access; no plan or build was accepted. Do not resubmit this request while this run is pending: a new message would start another run, not retrieve this result.`);
   }
   if (result.status !== "completed" || result.error) {
     const error = typeof result.error === "string" ? result.error : "";

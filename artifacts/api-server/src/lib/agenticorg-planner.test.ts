@@ -86,7 +86,8 @@ test("human review reports the existing run and never approves, polls, or starts
   const client = transport([{ ...completed, status: "hitl_triggered" }]);
   await assert.rejects(requestAgenticOrgPlan({}, { key: "test-only-key", plannerId, fetcher: client.fetcher }), error =>
     error instanceof AgenticOrgPlanningError && error.code === "review_required" &&
-    error.message.includes(completed.run_id) && error.message.includes("/dashboard/approvals"));
+    error.message.includes(completed.run_id) && error.message.includes("/dashboard/approvals") &&
+    error.message.includes("Do not resubmit this request"));
   assert.equal(client.requests.length, 1);
 });
 
