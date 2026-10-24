@@ -39,7 +39,8 @@ test("run-only credential uses hackathon UUID endpoint and task input without a 
   assert.equal(typeof body.inputs.task, "string");
   assert.ok(body.inputs.task.includes('"idea":"Bakery"'));
   assert.ok(body.inputs.task.includes("Expected JSON schema:"));
-  assert.equal(body.context.approval_required, true);
+  assert.deepEqual(body.context, {});
+  assert.ok(body.inputs.task.includes("Do not request AgenticOrg human approval merely to draft a valid plan."));
 });
 test("AgenticOrg authorization failures do not log upstream payloads or trigger another provider", async () => {
   const client = transport([new Response("sensitive-provider-error", { status: 403 })]);

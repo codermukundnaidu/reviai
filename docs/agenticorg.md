@@ -6,7 +6,7 @@ using the saved server-only credential:
 - Base URL: `https://agenticorg.hackathon.pinelabs.com`
 - Planner UUID: `4df6fad9-59cc-4b6b-bd26-56a08fef55bf`
 - `POST /api/v1/agents/{UUID}/run`
-- Body: `{ "action": "process", "inputs": { "task": "..." }, "context": { "approval_required": true } }`
+- Body: `{ "action": "process", "inputs": { "task": "..." }, "context": {} }`
 
 The task includes experience level, existing requirements, recent conversation,
 planning-only instructions, and Revi's complete expected JSON Schema. The agent
@@ -123,7 +123,7 @@ Content-Type: application/json
     "requirements": { "goal": "", "audience": "", "constraints": [], "questions": [] },
     "messages": [{ "role": "user", "content": "The user's idea and conversation context" }]
   },
-  "context": { "approval_required": true }
+  "context": {}
 }
 ```
 

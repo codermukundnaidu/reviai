@@ -61,6 +61,7 @@ Understand the goal, audience, workflow, experience level, and explicit constrai
 Ask exactly one question if important information is missing. Omitted constraints are not confirmation of no constraints.
 When requirements are clear, propose the plan immediately; approval is needed before implementation, not before drafting.
 Never call tools, change records, access accounts, send messages, execute code, build, deploy, or approve anything.
+Do not request AgenticOrg human approval merely to draft a valid plan. Revi separately requires the signed-in user to approve a plan before building.
 Return ONLY one JSON object matching the supplied schema, without markdown or additional fields.
 Clarification requires plan=null and exactly one requirements.questions entry.
 A ready plan requires nonempty goal and audience, no questions, and 2-8 concrete implementation/testing steps.
@@ -75,7 +76,9 @@ Never invent a confidence value to pass review.
 Expected JSON schema: ${JSON.stringify(planningContract)}
 Request data: ${JSON.stringify(input)}`,
         },
-        context: { approval_required: true },
+        // Revi approval is enforced by its own approve endpoint, after the
+        // planner returns. Do not tell AgenticOrg this run requires HITL.
+        context: {},
       }),
     });
   } catch {
