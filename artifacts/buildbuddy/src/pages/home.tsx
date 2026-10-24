@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useLocation } from 'wouter';
-import { ArrowUp, Loader2, Mic } from 'lucide-react';
+import { ArrowUp, Loader2 } from 'lucide-react';
+import { VoiceButton } from '@/components/voice-agent';
 import { useCreateProject, getListProjectsQueryKey, type ProjectInputLevel } from '@workspace/api-client-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { LEVELS, getLevel, setLevel, errMsg, initialKey } from '@/lib/bb';
@@ -53,9 +54,7 @@ export default function Home() {
           placeholder="For example: I run a small bakery and keep losing track of which orders are paid."
           className="w-full resize-none bg-transparent px-3 py-2 text-base outline-none placeholder:text-muted-foreground/70" />
         <div className="flex items-center justify-between px-1 pt-1">
-          <button disabled title="Voice is not connected" data-testid="button-voice" className="flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs text-muted-foreground opacity-70 cursor-not-allowed">
-            <Mic className="size-4" /> Voice not connected
-          </button>
+          <VoiceButton />
           <button onClick={submit} disabled={!text.trim() || create.isPending} data-testid="button-start"
             className="rounded-full bg-primary text-primary-foreground pl-5 pr-4 py-2.5 text-sm font-medium flex items-center gap-2 disabled:opacity-40">
             {create.isPending ? <Loader2 className="size-4 animate-spin" /> : null}

@@ -2,7 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 import { useParams, Link } from 'wouter';
 import { useQueryClient } from '@tanstack/react-query';
 import { formatDistanceToNow } from 'date-fns';
-import { ArrowUp, Check, CircleAlert, Loader2, Mic, X } from 'lucide-react';
+import { ArrowUp, Check, CircleAlert, Loader2, X } from 'lucide-react';
+import { VoiceButton } from '@/components/voice-agent';
 import {
   useGetProject, getGetProjectQueryKey, getListProjectsQueryKey, useSendMessage, useApprovePlan, useReviewProject, type Project,
 } from '@workspace/api-client-react';
@@ -113,14 +114,14 @@ export default function ProjectPage() {
       <div className="p-3 sm:p-4 border-t bg-background">
         {err && <p role="alert" data-testid="text-send-error" className="text-sm text-destructive mb-2">{err} Your message is kept below so you can resend.</p>}
         <div className="rounded-2xl border bg-card p-2 flex items-end gap-2 focus-within:ring-2 focus-within:ring-ring/25">
-          <button disabled title="Voice is not connected" className="p-2 text-muted-foreground opacity-60 cursor-not-allowed" data-testid="button-voice"><Mic className="size-4" /></button>
+          <VoiceButton />
           <textarea rows={2} value={draft} onChange={(e) => setDraft(e.target.value)} maxLength={10000} data-testid="input-message" placeholder="Reply to BuildBuddy"
             onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); if (draft.trim() && !busy) doSend(draft.trim(), true); } }}
             className="flex-1 resize-none bg-transparent text-sm outline-none py-2" />
           <button disabled={!draft.trim() || busy} onClick={() => doSend(draft.trim(), true)} data-testid="button-send" aria-label="Send"
             className="size-9 rounded-full bg-primary text-primary-foreground grid place-items-center disabled:opacity-40"><ArrowUp className="size-4" /></button>
         </div>
-        <p className="text-[11px] text-muted-foreground mt-1.5 px-1">Voice is a placeholder and not connected. Type for now.</p>
+        <p className="text-[11px] text-muted-foreground mt-1.5 px-1">Voice opens the ElevenLabs agent. Voice calls are separate from this saved project chat.</p>
       </div>
     </section>
   );

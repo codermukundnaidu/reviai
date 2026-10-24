@@ -4,6 +4,7 @@ import { ErrorBoundary } from '@/components/error-boundary';
 import { Toaster } from '@/components/ui/toaster';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { Shell } from '@/components/shell';
+import { VoiceAgentProvider } from '@/components/voice-agent';
 import Home from '@/pages/home';
 import Projects from '@/pages/projects';
 import ProjectPage from '@/pages/project';
@@ -49,7 +50,7 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, '')}>
-          <Router />
+          <VoiceAgentProvider><Router /></VoiceAgentProvider>
         </WouterRouter>
         <Toaster />
       </TooltipProvider>

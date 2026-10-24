@@ -5,7 +5,7 @@ export default function Settings() {
   const rows = [
     { id: 'ai', name: 'AI model', on: data?.ai, yes: 'Connected. Conversation and planning use the real model.', no: 'Not configured on the server. Messages cannot be answered until it is.' },
     { id: 'agenticorg', name: 'AgenticOrg backend', on: data?.agenticOrg, yes: 'Credentials are present on the server. Build activity reflects what the backend reports.', no: 'Not connected. Builds are not delegated to AgenticOrg, and nothing here pretends otherwise.' },
-    { id: 'voice', name: 'Voice', on: data?.voice, yes: 'Server reports voice as available, but this interface has no voice controls yet.', no: 'Not connected. Voice is a placeholder: the microphone button is disabled and nothing is recorded.' },
+    { id: 'voice', name: 'ElevenLabs voice', on: data?.voice, yes: 'Public agent linked. Choose Talk with voice, then start a call in the ElevenLabs panel. Microphone permission is required. Calls are separate from saved project chat; this status indicates configuration, not a live call health check.', no: 'Voice agent is not configured.' },
   ];
   return (
     <div className="max-w-3xl mx-auto px-5 py-10 md:py-14">

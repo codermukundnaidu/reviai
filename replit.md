@@ -42,7 +42,7 @@ A goal-first AI developer companion for non-programmers, with approved plans, sa
 - Select Beginner, Intermediate, Advanced or Pro, clarify an idea through AI text conversation, inspect understanding and explicitly approve a plan.
 - Supported prototype kinds: tracker, checklist, sum/average calculator, information browser. Interactive preview changes stay in localStorage; conversations and plans are in PostgreSQL.
 - Inspect backend-persisted activity, actual structural checks, review decisions and project history.
-- Voice is a clearly labelled unconnected placeholder, not working audio.
+- Voice uses the official ElevenLabs public-agent widget, loaded on demand from the home/project microphone controls. Calls remain separate from saved project chat and must not bypass explicit plan approvals. No ElevenLabs API key is required for this public embed.
 
 ## User preferences
 

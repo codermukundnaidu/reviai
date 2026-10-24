@@ -57,7 +57,7 @@ router.get("/integrations", (_req, res) => {
   res.json(GetIntegrationsResponse.parse({
     ai: Boolean(process.env.AI_INTEGRATIONS_OPENAI_BASE_URL && process.env.AI_INTEGRATIONS_OPENAI_API_KEY),
     agenticOrg: Boolean(process.env.AGENTICORG_URL && process.env.AGENTICORG_API_KEY),
-    voice: false,
+    voice: true,
   }));
 });
 router.get("/projects", async (_req, res): Promise<void> => {
