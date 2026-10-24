@@ -3,6 +3,7 @@ import { createHash, timingSafeEqual } from "node:crypto";
 import { PlanProjectBody, type PlanningInput } from "@workspace/api-zod";
 import { planFromIdea, validatePlanningResult } from "../lib/plan-project";
 import { isPlanningConfigured } from "../lib/buddy-agent";
+import { AgenticOrgPlanningError } from "../lib/agenticorg-planner";
 
 type Planner = (input: PlanningInput) => Promise<unknown>;
 type Options = {
@@ -42,7 +43,7 @@ export function createPlanningRouter(options: Options = {}): IRouter {
       res.status(400).json({ error: "Expected idea, experience_level, context, and optionally constraints, within the documented limits" }); return;
     }
     if (!isConfigured()) {
-      res.status(503).json({ error: "AI planning is not configured." }); return;
+      res.status(503).json({ error: "AgenticOrg planning is not configured." }); return;
     }
 
     const now = Date.now();
@@ -71,7 +72,7 @@ export function createPlanningRouter(options: Options = {}): IRouter {
     } catch (error) {
       // Do not log provider error payloads: they may include conversation context.
       req.log.warn({ errorType: error instanceof Error ? error.name : "UnknownError" }, "Planning failed");
-      res.status(502).json({ error: "The planner could not return a valid plan. No project was built or approved." });
+      res.status(502).json({ error: error instanceof AgenticOrgPlanningError ? error.message : "The planner could not return a valid plan. No project was built or approved." });
     }
   });
   return router;

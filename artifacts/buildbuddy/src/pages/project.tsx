@@ -10,6 +10,8 @@ import {
 import { PrototypeView } from '@/components/prototype';
 import { errMsg, initialKey } from '@/lib/bb';
 import { statusStyle } from './projects';
+import { useProjectEvents } from '@/hooks/use-project-events';
+import { BuildPreview, ConnectionBadge, EventTimeline } from '@/components/build-panel';
 
 const TABS = ['Understanding', 'Plan', 'Activity', 'Preview', 'Review'] as const;
 type Tab = (typeof TABS)[number];
@@ -18,7 +20,8 @@ const card = 'rounded-2xl border bg-card p-5';
 export default function ProjectPage() {
   const { id = '' } = useParams<{ id: string }>();
   const qc = useQueryClient();
-  const { data: project, isLoading, isError, refetch } = useGetProject(id, { query: { enabled: !!id, queryKey: getGetProjectQueryKey(id), refetchInterval: 1500 } });
+  const { data: project, isLoading, isError, refetch } = useGetProject(id, { query: { enabled: !!id, queryKey: getGetProjectQueryKey(id), refetchInterval: 20000 } });
+  const conn = useProjectEvents(id);
   const send = useSendMessage();
   const approve = useApprovePlan();
   const review = useReviewProject();
@@ -165,7 +168,7 @@ export default function ProjectPage() {
             <p className="text-sm text-muted-foreground mb-4">{project.plan.rationale}</p>
             <ol className="space-y-2 mb-5">{project.plan.steps.map((s, i) => (
               <li key={i} className="flex gap-3 text-sm"><span className="size-6 rounded-full bg-accent text-accent-foreground grid place-items-center text-xs shrink-0">{i + 1}</span>{s}</li>))}</ol>
-            <p className="text-xs text-muted-foreground mb-4">The prototype is a prebuilt screen filled only with data. No model-written code is run.</p>
+            <p className="text-xs text-muted-foreground mb-4">Revi currently builds one controlled thing: a bakery order tracker from a fixed template, with orders saved in a database. Custom coding is not part of this workflow yet. Nothing is built until you approve.</p>
             {awaiting || project.status === 'failed' ? (
               <button onClick={() => run(() => approve.mutateAsync({ id }))} disabled={approve.isPending} data-testid="button-approve"
                 className="rounded-full bg-primary text-primary-foreground px-6 py-2.5 text-sm font-medium flex items-center gap-2 disabled:opacity-60">
@@ -173,6 +176,7 @@ export default function ProjectPage() {
             ) : <p className="text-sm font-medium" data-testid="text-plan-state">{project.status === 'building' ? 'Approved. Building now.' : project.status === 'ready' ? 'Approved and built.' : 'Plan recorded.'}</p>}
           </div>
         ) : <div className={`${card} border-dashed text-sm text-muted-foreground`}>No plan yet. I only propose one after I understand your goal, and nothing is built until you approve it.</div>)}
+        {tab === 'Activity' && <EventTimeline events={project.events ?? []} />}
         {tab === 'Activity' && (project.activities.length ? (
           <ol className="space-y-3">{project.activities.map((a) => (
             <li key={a.id} className={`${card} flex gap-3`} data-testid={`activity-${a.id}`}>
@@ -182,14 +186,14 @@ export default function ProjectPage() {
                 <p className="text-xs text-muted-foreground/70 mt-1">{formatDistanceToNow(new Date(a.createdAt), { addSuffix: true })}</p></div>
             </li>))}</ol>
         ) : <div className={`${card} border-dashed text-sm text-muted-foreground`}>No activity yet. Real steps show up here as they happen.</div>)}
-        {tab === 'Preview' && (project.prototype ? <PrototypeView projectId={project.id} prototype={project.prototype} />
+        {tab === 'Preview' && (project.build ? <BuildPreview projectId={project.id} build={project.build} /> : project.prototype ? <PrototypeView projectId={project.id} prototype={project.prototype} />
           : <div className={`${card} border-dashed text-sm text-muted-foreground`}>{project.status === 'building' ? <span className="flex items-center gap-2"><Loader2 className="size-4 animate-spin" />Building your prototype...</span> : 'No prototype yet. Approve a plan to build one.'}</div>)}
         {tab === 'Review' && (
           <div className={card}>
             {!project.reviewApproved && project.activities.some(a => a.title === 'Changes requested') && <p className="text-sm font-medium mb-3">Changes requested. Continue the conversation to explain what should change.</p>}
             {project.tests.length ? (
               <>
-                <p className="text-xs text-muted-foreground mb-3">These are structural checks on the generated data, not browser tests.</p>
+                <p className="text-xs text-muted-foreground mb-3">These checks are run by the server on the generated files. They are not browser tests, and no browser checks have been recorded.</p>
                 <ul className="space-y-2 mb-5">{project.tests.map((t, i) => (
                   <li key={i} className="flex gap-3 text-sm" data-testid={`test-${i}`}>
                     {t.passed ? <Check className="size-4 mt-0.5 text-primary shrink-0" /> : <X className="size-4 mt-0.5 text-destructive shrink-0" />}
@@ -213,6 +217,7 @@ export default function ProjectPage() {
     <div className="h-[calc(100dvh-57px)] md:h-[100dvh] flex flex-col">
       <header className="px-4 sm:px-6 py-3 border-b flex items-center gap-3">
         <h1 className="font-display font-bold text-lg truncate flex-1" data-testid="text-project-title">{project.title || 'New project'}</h1>
+        <span className="hidden sm:inline"><ConnectionBadge state={conn} /></span>
         <span className="text-xs text-muted-foreground hidden sm:inline">{project.level}</span>
         <span className={`text-xs rounded-full px-2.5 py-1 ${statusStyle[project.status]}`} data-testid="status-project">{project.status.replace('-', ' ')}</span>
       </header>

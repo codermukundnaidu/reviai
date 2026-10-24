@@ -25,6 +25,9 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  BakeryOrder,
+  BakeryOrderDeletionInput,
+  BakeryOrderInput,
   HealthStatus,
   IntegrationStatus,
   MessageInput,
@@ -655,6 +658,572 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
         TContext
       > => {
       return useMutation(getReviewProjectMutationOptions(options), queryClient);
+    }
+
+export const getStreamProjectEventsUrl = (id: string,) => {
+
+
+
+
+  return `/api/projects/${id}/events`
+}
+
+/**
+ * @summary Browser-owned durable event stream with Last-Event-ID replay
+ */
+export const streamProjectEvents = async (id: string, options?: Parameters<typeof customFetch>[1]): Promise<string> => {
+
+  return customFetch<string>(getStreamProjectEventsUrl(id),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getStreamProjectEventsQueryKey = (id: string,) => {
+    return [
+    `/api/projects/${id}/events`
+    ] as const;
+    }
+
+
+export const getStreamProjectEventsQueryOptions = <TData = Awaited<ReturnType<typeof streamProjectEvents>>, TError = ErrorType<unknown>>(id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof streamProjectEvents>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getStreamProjectEventsQueryKey(id);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof streamProjectEvents>>> = ({ signal }) => streamProjectEvents(id, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: id !== null && id !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof streamProjectEvents>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type StreamProjectEventsQueryResult = NonNullable<Awaited<ReturnType<typeof streamProjectEvents>>>
+export type StreamProjectEventsQueryError = ErrorType<unknown>
+
+
+export function useStreamProjectEvents<TData = Awaited<ReturnType<typeof streamProjectEvents>>, TError = ErrorType<unknown>>(
+ id: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof streamProjectEvents>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof streamProjectEvents>>,
+          TError,
+          Awaited<ReturnType<typeof streamProjectEvents>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useStreamProjectEvents<TData = Awaited<ReturnType<typeof streamProjectEvents>>, TError = ErrorType<unknown>>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof streamProjectEvents>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof streamProjectEvents>>,
+          TError,
+          Awaited<ReturnType<typeof streamProjectEvents>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useStreamProjectEvents<TData = Awaited<ReturnType<typeof streamProjectEvents>>, TError = ErrorType<unknown>>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof streamProjectEvents>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Browser-owned durable event stream with Last-Event-ID replay
+ */
+
+export function useStreamProjectEvents<TData = Awaited<ReturnType<typeof streamProjectEvents>>, TError = ErrorType<unknown>>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof streamProjectEvents>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getStreamProjectEventsQueryOptions(id,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getGetBuildFileUrl = (id: string,
+    buildId: string,
+    file: 'index.html' | 'app.css' | 'app.js',) => {
+
+
+
+
+  return `/api/projects/${id}/builds/${buildId}/files/${file}`
+}
+
+/**
+ * @summary Private generated source or executable browser preview from App Storage
+ */
+export const getBuildFile = async (id: string,
+    buildId: string,
+    file: 'index.html' | 'app.css' | 'app.js', options?: Parameters<typeof customFetch>[1]): Promise<string> => {
+
+  return customFetch<string>(getGetBuildFileUrl(id,buildId,file),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetBuildFileQueryKey = (id: string,
+    buildId: string,
+    file: 'index.html' | 'app.css' | 'app.js',) => {
+    return [
+    `/api/projects/${id}/builds/${buildId}/files/${file}`
+    ] as const;
+    }
+
+
+export const getGetBuildFileQueryOptions = <TData = Awaited<ReturnType<typeof getBuildFile>>, TError = ErrorType<unknown>>(id: string,
+    buildId: string,
+    file: 'index.html' | 'app.css' | 'app.js', options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getBuildFile>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetBuildFileQueryKey(id,buildId,file);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getBuildFile>>> = ({ signal }) => getBuildFile(id,buildId,file, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: id !== null && id !== undefined && buildId !== null && buildId !== undefined && file !== null && file !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getBuildFile>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetBuildFileQueryResult = NonNullable<Awaited<ReturnType<typeof getBuildFile>>>
+export type GetBuildFileQueryError = ErrorType<unknown>
+
+
+export function useGetBuildFile<TData = Awaited<ReturnType<typeof getBuildFile>>, TError = ErrorType<unknown>>(
+ id: string,
+    buildId: string,
+    file: 'index.html' | 'app.css' | 'app.js', options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getBuildFile>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getBuildFile>>,
+          TError,
+          Awaited<ReturnType<typeof getBuildFile>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetBuildFile<TData = Awaited<ReturnType<typeof getBuildFile>>, TError = ErrorType<unknown>>(
+ id: string,
+    buildId: string,
+    file: 'index.html' | 'app.css' | 'app.js', options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getBuildFile>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getBuildFile>>,
+          TError,
+          Awaited<ReturnType<typeof getBuildFile>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetBuildFile<TData = Awaited<ReturnType<typeof getBuildFile>>, TError = ErrorType<unknown>>(
+ id: string,
+    buildId: string,
+    file: 'index.html' | 'app.css' | 'app.js', options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getBuildFile>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Private generated source or executable browser preview from App Storage
+ */
+
+export function useGetBuildFile<TData = Awaited<ReturnType<typeof getBuildFile>>, TError = ErrorType<unknown>>(
+ id: string,
+    buildId: string,
+    file: 'index.html' | 'app.css' | 'app.js', options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getBuildFile>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetBuildFileQueryOptions(id,buildId,file,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getListOrdersUrl = (id: string,) => {
+
+
+
+
+  return `/api/projects/${id}/orders`
+}
+
+export const listOrders = async (id: string, options?: Parameters<typeof customFetch>[1]): Promise<BakeryOrder[]> => {
+
+  return customFetch<BakeryOrder[]>(getListOrdersUrl(id),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListOrdersQueryKey = (id: string,) => {
+    return [
+    `/api/projects/${id}/orders`
+    ] as const;
+    }
+
+
+export const getListOrdersQueryOptions = <TData = Awaited<ReturnType<typeof listOrders>>, TError = ErrorType<unknown>>(id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listOrders>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListOrdersQueryKey(id);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listOrders>>> = ({ signal }) => listOrders(id, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: id !== null && id !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listOrders>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type ListOrdersQueryResult = NonNullable<Awaited<ReturnType<typeof listOrders>>>
+export type ListOrdersQueryError = ErrorType<unknown>
+
+
+export function useListOrders<TData = Awaited<ReturnType<typeof listOrders>>, TError = ErrorType<unknown>>(
+ id: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listOrders>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listOrders>>,
+          TError,
+          Awaited<ReturnType<typeof listOrders>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useListOrders<TData = Awaited<ReturnType<typeof listOrders>>, TError = ErrorType<unknown>>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listOrders>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listOrders>>,
+          TError,
+          Awaited<ReturnType<typeof listOrders>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useListOrders<TData = Awaited<ReturnType<typeof listOrders>>, TError = ErrorType<unknown>>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listOrders>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useListOrders<TData = Awaited<ReturnType<typeof listOrders>>, TError = ErrorType<unknown>>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listOrders>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getListOrdersQueryOptions(id,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getCreateOrderUrl = (id: string,) => {
+
+
+
+
+  return `/api/projects/${id}/orders`
+}
+
+export const createOrder = async (id: string,
+    bakeryOrderInput: BakeryOrderInput, options?: Parameters<typeof customFetch>[1]): Promise<BakeryOrder> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<BakeryOrder>(getCreateOrderUrl(id),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(bakeryOrderInput)
+  }
+);}
+
+
+
+
+
+export const getCreateOrderMutationKey = () => ['createOrder'] as const;
+
+export const getCreateOrderMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createOrder>>, TError,CreateOrderMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createOrder>>, TError,CreateOrderMutationVariables, TContext> => {
+
+const mutationKey = getCreateOrderMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createOrder>>, CreateOrderMutationVariables> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  createOrder(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateOrderMutationResult = NonNullable<Awaited<ReturnType<typeof createOrder>>>
+    export type CreateOrderMutationBody = BodyType<BakeryOrderInput>
+    export type CreateOrderMutationError = ErrorType<unknown>
+    export type CreateOrderMutationVariables = {id: string;data: BodyType<BakeryOrderInput>}
+
+    export const useCreateOrder = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createOrder>>, TError,CreateOrderMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof createOrder>>,
+        TError,
+        CreateOrderMutationVariables,
+        TContext
+      > => {
+      return useMutation(getCreateOrderMutationOptions(options), queryClient);
+    }
+
+export const getUpdateOrderUrl = (id: string,
+    orderId: string,) => {
+
+
+
+
+  return `/api/projects/${id}/orders/${orderId}`
+}
+
+export const updateOrder = async (id: string,
+    orderId: string,
+    bakeryOrderInput: BakeryOrderInput, options?: Parameters<typeof customFetch>[1]): Promise<BakeryOrder> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<BakeryOrder>(getUpdateOrderUrl(id,orderId),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(bakeryOrderInput)
+  }
+);}
+
+
+
+
+
+export const getUpdateOrderMutationKey = () => ['updateOrder'] as const;
+
+export const getUpdateOrderMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateOrder>>, TError,UpdateOrderMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateOrder>>, TError,UpdateOrderMutationVariables, TContext> => {
+
+const mutationKey = getUpdateOrderMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateOrder>>, UpdateOrderMutationVariables> = (props) => {
+          const {id,orderId,data} = props ?? {};
+
+          return  updateOrder(id,orderId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateOrderMutationResult = NonNullable<Awaited<ReturnType<typeof updateOrder>>>
+    export type UpdateOrderMutationBody = BodyType<BakeryOrderInput>
+    export type UpdateOrderMutationError = ErrorType<void>
+    export type UpdateOrderMutationVariables = {id: string;orderId: string;data: BodyType<BakeryOrderInput>}
+
+    export const useUpdateOrder = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateOrder>>, TError,UpdateOrderMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof updateOrder>>,
+        TError,
+        UpdateOrderMutationVariables,
+        TContext
+      > => {
+      return useMutation(getUpdateOrderMutationOptions(options), queryClient);
+    }
+
+export const getDeleteOrderUrl = (id: string,
+    orderId: string,) => {
+
+
+
+
+  return `/api/projects/${id}/orders/${orderId}`
+}
+
+export const deleteOrder = async (id: string,
+    orderId: string,
+    bakeryOrderDeletionInput: BakeryOrderDeletionInput, options?: Parameters<typeof customFetch>[1]): Promise<void> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<void>(getDeleteOrderUrl(id,orderId),
+  {
+    ...options,
+    method: 'DELETE',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(bakeryOrderDeletionInput)
+  }
+);}
+
+
+
+
+
+export const getDeleteOrderMutationKey = () => ['deleteOrder'] as const;
+
+export const getDeleteOrderMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteOrder>>, TError,DeleteOrderMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteOrder>>, TError,DeleteOrderMutationVariables, TContext> => {
+
+const mutationKey = getDeleteOrderMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteOrder>>, DeleteOrderMutationVariables> = (props) => {
+          const {id,orderId,data} = props ?? {};
+
+          return  deleteOrder(id,orderId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteOrderMutationResult = NonNullable<Awaited<ReturnType<typeof deleteOrder>>>
+    export type DeleteOrderMutationBody = BodyType<BakeryOrderDeletionInput>
+    export type DeleteOrderMutationError = ErrorType<void>
+    export type DeleteOrderMutationVariables = {id: string;orderId: string;data: BodyType<BakeryOrderDeletionInput>}
+
+    export const useDeleteOrder = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteOrder>>, TError,DeleteOrderMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof deleteOrder>>,
+        TError,
+        DeleteOrderMutationVariables,
+        TContext
+      > => {
+      return useMutation(getDeleteOrderMutationOptions(options), queryClient);
     }
 
 export const getGetIntegrationsUrl = () => {

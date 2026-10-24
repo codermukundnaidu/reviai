@@ -6,6 +6,8 @@
  * OpenAPI spec version: 0.1.0
  */
 import type { Activity } from './activity';
+import type { BuildArtifact } from './buildArtifact';
+import type { BuildEvent } from './buildEvent';
 import type { Message } from './message';
 import type { Plan } from './plan';
 import type { ProjectLevel } from './projectLevel';
@@ -22,6 +24,8 @@ export interface Project {
   requirements: Requirements;
   plan?: Plan;
   prototype?: Prototype;
+  build?: BuildArtifact;
+  events?: BuildEvent[];
   messages: Message[];
   activities: Activity[];
   tests: TestResult[];

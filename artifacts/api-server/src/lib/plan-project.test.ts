@@ -6,6 +6,7 @@ import express from "express";
 import pinoHttp from "pino-http";
 import { createPlanningRouter } from "../routes/plan-project";
 import { planFromIdea, validatePlanningResult } from "./plan-project";
+import { AgenticOrgPlanningError } from "./agenticorg-planner";
 
 // Synthetic test credential only. Never used as an application secret.
 const testSecret = "synthetic-planning-test-credential-not-for-production";
@@ -150,8 +151,8 @@ test("authenticated traffic is bounded by a per-process planning budget", async 
   } finally { await h.close(); }
 });
 
-test("configured OpenAI planner honors a complete idea without AgenticOrg and returns a validated proposal", {
-  skip: !(process.env.AI_INTEGRATIONS_OPENAI_API_KEY && process.env.AI_INTEGRATIONS_OPENAI_BASE_URL),
+test("configured AgenticOrg planner returns a validated proposal (explicit opt-in live check)", {
+  skip: process.env.RUN_LIVE_PLANNING_TESTS !== "1",
   timeout: 55000,
 }, async () => {
   const result = await planFromIdea(input);
@@ -161,11 +162,25 @@ test("configured OpenAI planner honors a complete idea without AgenticOrg and re
 });
 
 test("configured real planner asks one question for an incomplete idea", {
-  skip: !(process.env.AI_INTEGRATIONS_OPENAI_API_KEY && process.env.AI_INTEGRATIONS_OPENAI_BASE_URL),
+  skip: process.env.RUN_LIVE_PLANNING_TESTS !== "1",
   timeout: 55000,
 }, async () => {
   const result = await planFromIdea({ idea: "I need help organizing things.", experience_level: "Beginner", context: "" });
   assert.equal(result.status, "needs_clarification");
   assert.equal(result.plan, null);
   assert.equal(result.requirements.questions.length, 1);
+});
+
+test("webhook exposes safe human-review guidance without returning a plan or implying approval", async () => {
+  const h = await harness({ planner: async () => {
+    throw new AgenticOrgPlanningError("review_required", "AgenticOrg run test-run requires human review. No build was approved.");
+  } });
+  try {
+    const result = await h.post();
+    assert.equal(result.status, 502);
+    const body = await result.json() as Record<string, unknown>;
+    assert.match(String(body.error), /human review/);
+    assert.equal(body.plan, undefined);
+    assert.equal(body.approval_required, undefined);
+  } finally { await h.close(); }
 });

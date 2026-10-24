@@ -142,6 +142,124 @@ export interface Activity {
   createdAt: string;
 }
 
+export type BuildEventType = typeof BuildEventType[keyof typeof BuildEventType];
+
+
+export const BuildEventType = {
+  plan_ready: 'plan_ready',
+  approval_required: 'approval_required',
+  build_started: 'build_started',
+  file_changed: 'file_changed',
+  preview_ready: 'preview_ready',
+  test_started: 'test_started',
+  test_passed: 'test_passed',
+  test_failed: 'test_failed',
+  build_completed: 'build_completed',
+  build_failed: 'build_failed',
+} as const;
+
+export interface BuildEvent {
+  id: string;
+  projectId: string;
+  type: BuildEventType;
+  detail: string;
+  createdAt: string;
+}
+
+export interface BuildFile {
+  name: string;
+  bytes: number;
+  sha256: string;
+}
+
+export type BuildArtifactKind = typeof BuildArtifactKind[keyof typeof BuildArtifactKind];
+
+
+export const BuildArtifactKind = {
+  'bakery-order-tracker': 'bakery-order-tracker',
+} as const;
+
+export type BuildArtifactStatus = typeof BuildArtifactStatus[keyof typeof BuildArtifactStatus];
+
+
+export const BuildArtifactStatus = {
+  building: 'building',
+  ready: 'ready',
+  failed: 'failed',
+} as const;
+
+export interface BuildArtifact {
+  id: string;
+  kind: BuildArtifactKind;
+  status: BuildArtifactStatus;
+  files: BuildFile[];
+  previewUrl?: string;
+  createdAt: string;
+}
+
+export type BakeryOrderInputStatus = typeof BakeryOrderInputStatus[keyof typeof BakeryOrderInputStatus];
+
+
+export const BakeryOrderInputStatus = {
+  received: 'received',
+  preparing: 'preparing',
+  ready: 'ready',
+  collected: 'collected',
+} as const;
+
+export interface BakeryOrderInput {
+  /**
+     * @minLength 1
+     * @maxLength 120
+     */
+  customerName: string;
+  /**
+     * @minLength 1
+     * @maxLength 1000
+     */
+  items: string;
+  /**
+     * @minimum 1
+     * @maximum 10000
+     */
+  quantity: number;
+  /** @pattern ^\d{4}-\d{2}-\d{2}$ */
+  pickupDate: string;
+  status: BakeryOrderInputStatus;
+  /**
+     * Required for edits; optimistic concurrency token
+     * @minimum 1
+     */
+  version?: number;
+}
+
+export interface BakeryOrderDeletionInput {
+  /** @minimum 1 */
+  version: number;
+}
+
+export type BakeryOrderStatus = typeof BakeryOrderStatus[keyof typeof BakeryOrderStatus];
+
+
+export const BakeryOrderStatus = {
+  received: 'received',
+  preparing: 'preparing',
+  ready: 'ready',
+  collected: 'collected',
+} as const;
+
+export interface BakeryOrder {
+  id: string;
+  customerName: string;
+  items: string;
+  quantity: number;
+  pickupDate: string;
+  status: BakeryOrderStatus;
+  version: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export type PrototypeKind = typeof PrototypeKind[keyof typeof PrototypeKind];
 
 
@@ -194,6 +312,8 @@ export interface Project {
   requirements: Requirements;
   plan?: Plan;
   prototype?: Prototype;
+  build?: BuildArtifact;
+  events?: BuildEvent[];
   messages: Message[];
   activities: Activity[];
   tests: TestResult[];

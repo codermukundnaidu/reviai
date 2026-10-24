@@ -1,20 +1,11 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { requestAgenticOrgPlan } from "./agenticorg-planner";
+import { AgenticOrgPlanningError, requestAgenticOrgPlan } from "./agenticorg-planner";
 
 const plannerId = "f73d995a-a6fe-44c0-9a41-cdc1026638cc";
 const output = { reply: "Who will use it?", title: "Bakery tracker", requirements: {
   goal: "Track bakery orders", audience: "", constraints: [], questions: ["Who will use it?"],
 }, plan: null };
-const metadata = {
-  id: plannerId, agent_type: "buildbuddy_product_planner", status: "shadow",
-  authorized_tools: [], connector_ids: [],
-  config: { output_schema_json: {
-    type: "object", additionalProperties: false,
-    required: ["reply", "title", "requirements", "plan"],
-    properties: { reply: {}, title: {}, requirements: {}, plan: {} },
-  } },
-};
 const completed = {
   run_id: "real-provider-run", agent_id: plannerId, status: "completed", tool_calls: [], output,
 };
@@ -34,16 +25,20 @@ test("mandatory AgenticOrg configuration fails before any request, without a fal
   await assert.rejects(requestAgenticOrgPlan({}, { key: "", plannerId: "", fetcher: client.fetcher }), /not configured/);
   assert.equal(client.requests.length, 0);
 });
-test("native AgenticOrg metadata and run use only the verified host and server authorization", async () => {
-  const client = transport([metadata, completed]);
+test("run-only credential uses hackathon UUID endpoint and task input without a metadata preflight", async () => {
+  const client = transport([completed]);
   const result = await requestAgenticOrgPlan({ idea: "Bakery" }, { key: "test-only-key", plannerId, fetcher: client.fetcher });
   assert.deepEqual(result, output);
-  assert.equal(client.requests.length, 2);
-  assert.equal(client.requests[1]?.url, `https://app.agenticorg.ai/api/v1/agents/${plannerId}/run`);
-  assert.equal(client.requests[1]?.init?.method, "POST");
-  assert.equal(client.requests[1]?.init?.redirect, "error");
-  const body = JSON.parse(String(client.requests[1]?.init?.body));
-  assert.equal(body.action, "plan_project");
+  assert.equal(client.requests.length, 1);
+  assert.equal(client.requests[0]?.url, `https://agenticorg.hackathon.pinelabs.com/api/v1/agents/${plannerId}/run`);
+  assert.equal(client.requests[0]?.init?.method, "POST");
+  assert.equal(client.requests[0]?.init?.redirect, "error");
+  assert.equal((client.requests[0]?.init?.headers as Record<string, string>).Authorization, "Bearer test-only-key");
+  const body = JSON.parse(String(client.requests[0]?.init?.body));
+  assert.equal(body.action, "process");
+  assert.equal(typeof body.inputs.task, "string");
+  assert.ok(body.inputs.task.includes('"idea":"Bakery"'));
+  assert.ok(body.inputs.task.includes("Expected JSON schema:"));
   assert.equal(body.context.approval_required, true);
 });
 test("AgenticOrg authorization failures do not log upstream payloads or trigger another provider", async () => {
@@ -52,17 +47,17 @@ test("AgenticOrg authorization failures do not log upstream payloads or trigger 
     error instanceof Error && error.message.includes("HTTP 403") && !error.message.includes("sensitive"));
   assert.equal(client.requests.length, 1);
 });
-test("planner with external tools, missing schema, or inactive lifecycle is refused before running", async () => {
+test("unsupported origins and invalid UUIDs cannot receive the credential", async () => {
   for (const unsafe of [
-    { ...metadata, authorized_tools: ["send_email"] },
-    { ...metadata, connector_ids: ["mail"] },
-    { ...metadata, config: {} },
-    { ...metadata, status: "retired" },
-    { ...metadata, agent_type: "confluence:create_page" },
+    { baseUrl: "https://untrusted.example" },
+    { baseUrl: "http://agenticorg.hackathon.pinelabs.com" },
+    { baseUrl: "https://agenticorg.hackathon.pinelabs.com/other" },
+    { baseUrl: "https://agenticorg.hackathon.pinelabs.com?forward=1" },
+    { plannerId: "product_agent" },
   ]) {
-    const client = transport([unsafe]);
-    await assert.rejects(requestAgenticOrgPlan({}, { key: "test-only-key", plannerId, fetcher: client.fetcher }), /tool-free/);
-    assert.equal(client.requests.length, 1);
+    const client = transport([]);
+    await assert.rejects(requestAgenticOrgPlan({}, { key: "test-only-key", plannerId, fetcher: client.fetcher, ...unsafe }), /not configured/);
+    assert.equal(client.requests.length, 0);
   }
 });
 test("failed, gated, wrong-agent, or tool-executing runs cannot become accepted plans", async () => {
@@ -73,8 +68,45 @@ test("failed, gated, wrong-agent, or tool-executing runs cannot become accepted 
     { ...completed, agent_id: "other-agent" },
     { ...completed, tool_calls: [{ tool: "send_email" }] },
     { ...completed, output: "not a structured object" },
+    { ...completed, run_id: "" },
+    { ...completed, tool_calls: undefined },
+    { ...completed, output: { raw_output: JSON.stringify(output), status: "completed" } },
+    { ...completed, output: { ...output, extra: true } },
+    { ...completed, output: { ...output, requirements: { ...output.requirements, questions: [] } } },
+    { ...completed, output: { ...output, reply: "  " } },
   ]) {
-    const client = transport([metadata, invalid]);
-    await assert.rejects(requestAgenticOrgPlan({}, { key: "test-only-key", plannerId, fetcher: client.fetcher }), /did not complete/);
+    const client = transport([invalid]);
+    await assert.rejects(requestAgenticOrgPlan({}, { key: "test-only-key", plannerId, fetcher: client.fetcher }), error => error instanceof AgenticOrgPlanningError);
+    assert.equal(client.requests.length, 1);
   }
+});
+
+test("human review reports the existing run and never approves, polls, or starts another run", async () => {
+  const client = transport([{ ...completed, status: "hitl_triggered" }]);
+  await assert.rejects(requestAgenticOrgPlan({}, { key: "test-only-key", plannerId, fetcher: client.fetcher }), error =>
+    error instanceof AgenticOrgPlanningError && error.code === "review_required" &&
+    error.message.includes(completed.run_id) && error.message.includes("/dashboard/approvals"));
+  assert.equal(client.requests.length, 1);
+});
+
+test("completed proposals require resolved requirements and useful steps", async () => {
+  const ready = { ...output, requirements: { ...output.requirements, audience: "Staff", questions: [] },
+    plan: { title: "Bakery", kind: "tracker", rationale: "A simple prototype.", steps: ["Generate example labels", "Validate and review the preview"] } };
+  const call = (value: unknown) => requestAgenticOrgPlan({}, {
+    key: "test-only-key", plannerId, fetcher: transport([{ ...completed, output: value }]).fetcher,
+  });
+  assert.deepEqual(await call(ready), ready);
+  await assert.rejects(call({ ...ready, requirements: { ...ready.requirements, audience: "" } }), /valid Revi plan/);
+  await assert.rejects(call({ ...ready, plan: { ...ready.plan, steps: [" ", "Review"] } }), /valid Revi plan/);
+});
+
+test("provider failures are classified without exposing private error text", async () => {
+  for (const error of ["GoogleRateLimitError: private payload", "GoogleModelNotFoundError: private payload"]) {
+    const client = transport([{ ...completed, status: "failed", error }]);
+    await assert.rejects(requestAgenticOrgPlan({}, { key: "test-only-key", plannerId, fetcher: client.fetcher }), e =>
+      e instanceof AgenticOrgPlanningError && e.code === "execution_failed" && !e.message.includes("private payload"));
+  }
+  const fetcher: typeof fetch = async () => { throw new Error("private network payload"); };
+  await assert.rejects(requestAgenticOrgPlan({}, { key: "test-only-key", plannerId, fetcher }), e =>
+    e instanceof AgenticOrgPlanningError && e.code === "transport" && !e.message.includes("private network payload"));
 });

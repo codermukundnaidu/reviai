@@ -1,19 +1,18 @@
 ---
 name: Planning provider decision
-description: Current provider decision and lessons from the retired AgenticOrg setup
+description: Provider choice, hackathon instance, and runtime/permission distinctions
 ---
 
-Do not require or call AgenticOrg for Revi. Use the configured Replit AI
-integration for planning and safe prototype generation.
+The user explicitly requested, "reconnect AgenticOrg to Revi." This supersedes
+their earlier removal of the integration. AgenticOrg is the planner; OpenAI
+remains the separate approved prototype generator, not a planning fallback.
 
-**Why:** After repeated AgenticOrg authorization failures, the user explicitly
-changed the requirement: "do without agenticorg integration". This supersedes
-their earlier mandatory-provider instruction.
+**Why:** The user first removed AgenticOrg after authorization failures, then
+tested their hackathon instance and explicitly requested reconnection.
 
-**How to apply:** Do not reintroduce AgenticOrg setup or permission requests.
-Keep provider-enforced structured output, server validation, explicit user
-approval, and implementation as separate stages. The remaining notes are
-historical guidance only if the user explicitly requests AgenticOrg again.
+**How to apply:** Keep server validation, provider review, Revi's explicit build
+approval, and implementation separate. Do not describe configured credentials,
+HTTP 200, or a human-approved review as proof of a completed valid plan.
 
 For this project's AgenticOrg tests, use the user-provided hackathon instance:
 `https://agenticorg.hackathon.pinelabs.com`, not the SDK's default
@@ -25,10 +24,23 @@ access. Earlier default-host errors did not establish credential validity on
 the intended instance.
 
 **How to apply:** A request to test another agent does not itself restore
-AgenticOrg as Revi's provider. Use UUID execution with the documented `task`
+AgenticOrg as Revi's provider; the subsequent explicit reconnection request did.
+Use UUID execution with the documented `task`
 input, distinguish metadata permissions from execution permissions, and inspect
 the returned status and sanitized error rather than treating HTTP 200 as a
 completed plan. Do not send credentials across hosts through redirects.
+
+Use the least-privilege run interface without inventing a metadata-read requirement.
+
+**Why:** The hackathon credential could execute native UUID runs but received
+401 on metadata and approval reads. The old default-host adapter also demanded
+an arbitrary agent type name, which is not a requirement of the native run API.
+
+**How to apply:** Target only the administrator-configured dedicated planner.
+Send the expected schema in the task and validate completed output strictly.
+Native schema enforcement is an administrator configuration, not something Revi
+can attest to through a run-only key. Do not weaken validation, fake confidence,
+or perform privileged review decisions to work around access restrictions.
 
 Shadow status alone does not mean an AgenticOrg agent cannot run.
 

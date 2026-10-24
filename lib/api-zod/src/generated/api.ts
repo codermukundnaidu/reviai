@@ -72,6 +72,25 @@ export const ListProjectsResponseItem = zod.object({
   "description": zod.string(),
   "items": zod.array(zod.string())
 }).optional(),
+  "build": zod.object({
+  "id": zod.string(),
+  "kind": zod.enum(['bakery-order-tracker']),
+  "status": zod.enum(['building', 'ready', 'failed']),
+  "files": zod.array(zod.object({
+  "name": zod.string(),
+  "bytes": zod.number().int(),
+  "sha256": zod.string()
+})),
+  "previewUrl": zod.string().optional(),
+  "createdAt": zod.string()
+}).optional(),
+  "events": zod.array(zod.object({
+  "id": zod.string(),
+  "projectId": zod.string(),
+  "type": zod.enum(['plan_ready', 'approval_required', 'build_started', 'file_changed', 'preview_ready', 'test_started', 'test_passed', 'test_failed', 'build_completed', 'build_failed']),
+  "detail": zod.string(),
+  "createdAt": zod.string()
+})).optional(),
   "messages": zod.array(zod.object({
   "id": zod.string(),
   "role": zod.enum(['user', 'assistant']),
@@ -124,6 +143,25 @@ export const CreateProjectResponse = zod.object({
   "description": zod.string(),
   "items": zod.array(zod.string())
 }).optional(),
+  "build": zod.object({
+  "id": zod.string(),
+  "kind": zod.enum(['bakery-order-tracker']),
+  "status": zod.enum(['building', 'ready', 'failed']),
+  "files": zod.array(zod.object({
+  "name": zod.string(),
+  "bytes": zod.number().int(),
+  "sha256": zod.string()
+})),
+  "previewUrl": zod.string().optional(),
+  "createdAt": zod.string()
+}).optional(),
+  "events": zod.array(zod.object({
+  "id": zod.string(),
+  "projectId": zod.string(),
+  "type": zod.enum(['plan_ready', 'approval_required', 'build_started', 'file_changed', 'preview_ready', 'test_started', 'test_passed', 'test_failed', 'build_completed', 'build_failed']),
+  "detail": zod.string(),
+  "createdAt": zod.string()
+})).optional(),
   "messages": zod.array(zod.object({
   "id": zod.string(),
   "role": zod.enum(['user', 'assistant']),
@@ -175,6 +213,25 @@ export const GetProjectResponse = zod.object({
   "description": zod.string(),
   "items": zod.array(zod.string())
 }).optional(),
+  "build": zod.object({
+  "id": zod.string(),
+  "kind": zod.enum(['bakery-order-tracker']),
+  "status": zod.enum(['building', 'ready', 'failed']),
+  "files": zod.array(zod.object({
+  "name": zod.string(),
+  "bytes": zod.number().int(),
+  "sha256": zod.string()
+})),
+  "previewUrl": zod.string().optional(),
+  "createdAt": zod.string()
+}).optional(),
+  "events": zod.array(zod.object({
+  "id": zod.string(),
+  "projectId": zod.string(),
+  "type": zod.enum(['plan_ready', 'approval_required', 'build_started', 'file_changed', 'preview_ready', 'test_started', 'test_passed', 'test_failed', 'build_completed', 'build_failed']),
+  "detail": zod.string(),
+  "createdAt": zod.string()
+})).optional(),
   "messages": zod.array(zod.object({
   "id": zod.string(),
   "role": zod.enum(['user', 'assistant']),
@@ -234,6 +291,25 @@ export const SendMessageResponse = zod.object({
   "description": zod.string(),
   "items": zod.array(zod.string())
 }).optional(),
+  "build": zod.object({
+  "id": zod.string(),
+  "kind": zod.enum(['bakery-order-tracker']),
+  "status": zod.enum(['building', 'ready', 'failed']),
+  "files": zod.array(zod.object({
+  "name": zod.string(),
+  "bytes": zod.number().int(),
+  "sha256": zod.string()
+})),
+  "previewUrl": zod.string().optional(),
+  "createdAt": zod.string()
+}).optional(),
+  "events": zod.array(zod.object({
+  "id": zod.string(),
+  "projectId": zod.string(),
+  "type": zod.enum(['plan_ready', 'approval_required', 'build_started', 'file_changed', 'preview_ready', 'test_started', 'test_passed', 'test_failed', 'build_completed', 'build_failed']),
+  "detail": zod.string(),
+  "createdAt": zod.string()
+})).optional(),
   "messages": zod.array(zod.object({
   "id": zod.string(),
   "role": zod.enum(['user', 'assistant']),
@@ -285,6 +361,25 @@ export const ApprovePlanResponse = zod.object({
   "description": zod.string(),
   "items": zod.array(zod.string())
 }).optional(),
+  "build": zod.object({
+  "id": zod.string(),
+  "kind": zod.enum(['bakery-order-tracker']),
+  "status": zod.enum(['building', 'ready', 'failed']),
+  "files": zod.array(zod.object({
+  "name": zod.string(),
+  "bytes": zod.number().int(),
+  "sha256": zod.string()
+})),
+  "previewUrl": zod.string().optional(),
+  "createdAt": zod.string()
+}).optional(),
+  "events": zod.array(zod.object({
+  "id": zod.string(),
+  "projectId": zod.string(),
+  "type": zod.enum(['plan_ready', 'approval_required', 'build_started', 'file_changed', 'preview_ready', 'test_started', 'test_passed', 'test_failed', 'build_completed', 'build_failed']),
+  "detail": zod.string(),
+  "createdAt": zod.string()
+})).optional(),
   "messages": zod.array(zod.object({
   "id": zod.string(),
   "role": zod.enum(['user', 'assistant']),
@@ -340,6 +435,25 @@ export const ReviewProjectResponse = zod.object({
   "description": zod.string(),
   "items": zod.array(zod.string())
 }).optional(),
+  "build": zod.object({
+  "id": zod.string(),
+  "kind": zod.enum(['bakery-order-tracker']),
+  "status": zod.enum(['building', 'ready', 'failed']),
+  "files": zod.array(zod.object({
+  "name": zod.string(),
+  "bytes": zod.number().int(),
+  "sha256": zod.string()
+})),
+  "previewUrl": zod.string().optional(),
+  "createdAt": zod.string()
+}).optional(),
+  "events": zod.array(zod.object({
+  "id": zod.string(),
+  "projectId": zod.string(),
+  "type": zod.enum(['plan_ready', 'approval_required', 'build_started', 'file_changed', 'preview_ready', 'test_started', 'test_passed', 'test_failed', 'build_completed', 'build_failed']),
+  "detail": zod.string(),
+  "createdAt": zod.string()
+})).optional(),
   "messages": zod.array(zod.object({
   "id": zod.string(),
   "role": zod.enum(['user', 'assistant']),
@@ -362,6 +476,134 @@ export const ReviewProjectResponse = zod.object({
   "createdAt": zod.string(),
   "updatedAt": zod.string()
 })
+
+
+/**
+ * @summary Browser-owned durable event stream with Last-Event-ID replay
+ */
+export const StreamProjectEventsParams = zod.object({
+  "id": zod.coerce.string()
+})
+
+export const StreamProjectEventsResponse = zod.unknown()
+
+
+/**
+ * @summary Private generated source or executable browser preview from App Storage
+ */
+export const GetBuildFileParams = zod.object({
+  "id": zod.coerce.string(),
+  "buildId": zod.coerce.string(),
+  "file": zod.enum(['index.html', 'app.css', 'app.js'])
+})
+
+export const GetBuildFileResponse = zod.string()
+
+
+export const ListOrdersParams = zod.object({
+  "id": zod.coerce.string()
+})
+
+export const ListOrdersResponseItem = zod.object({
+  "id": zod.string(),
+  "customerName": zod.string(),
+  "items": zod.string(),
+  "quantity": zod.number().int(),
+  "pickupDate": zod.string(),
+  "status": zod.enum(['received', 'preparing', 'ready', 'collected']),
+  "version": zod.number().int(),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string()
+})
+export const ListOrdersResponse = zod.array(ListOrdersResponseItem)
+
+
+export const CreateOrderParams = zod.object({
+  "id": zod.coerce.string()
+})
+
+export const createOrderBodyCustomerNameMax = 120;
+
+export const createOrderBodyItemsMax = 1000;
+
+export const createOrderBodyQuantityMax = 10000;
+
+export const createOrderBodyPickupDateRegExp = new RegExp('^\\d{4}-\\d{2}-\\d{2}$');
+
+
+
+export const CreateOrderBody = zod.object({
+  "customerName": zod.string().min(1).max(createOrderBodyCustomerNameMax),
+  "items": zod.string().min(1).max(createOrderBodyItemsMax),
+  "quantity": zod.number().int().min(1).max(createOrderBodyQuantityMax),
+  "pickupDate": zod.string().regex(createOrderBodyPickupDateRegExp),
+  "status": zod.enum(['received', 'preparing', 'ready', 'collected']),
+  "version": zod.number().int().min(1).optional().describe('Required for edits; optimistic concurrency token')
+})
+
+export const CreateOrderResponse = zod.object({
+  "id": zod.string(),
+  "customerName": zod.string(),
+  "items": zod.string(),
+  "quantity": zod.number().int(),
+  "pickupDate": zod.string(),
+  "status": zod.enum(['received', 'preparing', 'ready', 'collected']),
+  "version": zod.number().int(),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string()
+})
+
+
+export const UpdateOrderParams = zod.object({
+  "id": zod.coerce.string(),
+  "orderId": zod.coerce.string()
+})
+
+export const updateOrderBodyCustomerNameMax = 120;
+
+export const updateOrderBodyItemsMax = 1000;
+
+export const updateOrderBodyQuantityMax = 10000;
+
+export const updateOrderBodyPickupDateRegExp = new RegExp('^\\d{4}-\\d{2}-\\d{2}$');
+
+
+
+export const UpdateOrderBody = zod.object({
+  "customerName": zod.string().min(1).max(updateOrderBodyCustomerNameMax),
+  "items": zod.string().min(1).max(updateOrderBodyItemsMax),
+  "quantity": zod.number().int().min(1).max(updateOrderBodyQuantityMax),
+  "pickupDate": zod.string().regex(updateOrderBodyPickupDateRegExp),
+  "status": zod.enum(['received', 'preparing', 'ready', 'collected']),
+  "version": zod.number().int().min(1).optional().describe('Required for edits; optimistic concurrency token')
+})
+
+export const UpdateOrderResponse = zod.object({
+  "id": zod.string(),
+  "customerName": zod.string(),
+  "items": zod.string(),
+  "quantity": zod.number().int(),
+  "pickupDate": zod.string(),
+  "status": zod.enum(['received', 'preparing', 'ready', 'collected']),
+  "version": zod.number().int(),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string()
+})
+
+
+export const DeleteOrderParams = zod.object({
+  "id": zod.coerce.string(),
+  "orderId": zod.coerce.string()
+})
+
+
+
+
+export const DeleteOrderBody = zod.object({
+  "version": zod.number().int().min(1)
+})
+
+export const DeleteOrderResponse = zod.void()
 
 
 export const GetIntegrationsResponse = zod.object({

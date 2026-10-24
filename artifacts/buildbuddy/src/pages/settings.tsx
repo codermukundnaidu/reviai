@@ -3,7 +3,7 @@ import { useGetIntegrations } from '@workspace/api-client-react';
 export default function Settings() {
   const { data, isLoading, isError, refetch } = useGetIntegrations();
   const rows = [
-    { id: 'ai', name: 'OpenAI planning & prototypes', on: data?.ai, yes: 'Configured through Replit AI Integrations. Plans use strict structured output and server-side validation. Building requires your explicit approval. AgenticOrg is not used.', no: 'Replit AI Integrations is not configured. Planning and prototype generation need server-side OpenAI access.' },
+    { id: 'ai', name: 'AgenticOrg planning', on: data?.agenticOrg, yes: 'AgenticOrg is configured for text planning and the voice planning webhook. Each response must pass strict validation. Configuration is not a live health check; no OpenAI planning fallback is used.', no: 'AgenticOrg planning needs a server-only key, planner UUID, and supported instance URL.' },
     { id: 'voice', name: 'ElevenLabs voice', on: data?.voice, yes: 'Public agent linked. Choose Talk with voice, then start a call in the ElevenLabs panel. Microphone permission is required. Calls are separate from saved project chat; this status indicates configuration, not a live call health check.', no: 'Voice agent is not configured.' },
   ];
   return (
@@ -25,9 +25,10 @@ export default function Settings() {
       </div>
       <div className="rounded-2xl bg-sidebar text-sidebar-foreground p-6 space-y-3 text-sm leading-relaxed">
         <h2 className="font-display font-bold text-lg">How this is handled</h2>
-        <p>AI and webhook credentials stay on the server. No AgenticOrg integration or key is required. AI usage is billed to your Replit credits.</p>
+        <p>AgenticOrg and webhook credentials stay on the server. AgenticOrg human review is separate from your approval to build in Revi. Pending or invalid provider results never authorize a build.</p>
+        <p>After you approve a bakery tracker plan, a controlled compiler generates real HTML, CSS and JavaScript, stores the source privately, and runs source/database checks. AgenticOrg is the planner, not a coding agent.</p>
         <p>There are no accounts. Your projects are tied to an anonymous cookie in this browser, so clearing it or switching browsers means you will not see them.</p>
-        <p>Prototypes come in four safe kinds: tracker, checklist, calculator and information. They are prebuilt screens that only display the data returned to them. Code or HTML written by the model is never run.</p>
+        <p>The bakery app supports saved orders with add, edit, status changes and delete. Other project kinds still use the older data-only prototypes through OpenAI. Arbitrary model-generated code is never executed.</p>
       </div>
     </div>
   );

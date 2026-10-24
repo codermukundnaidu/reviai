@@ -111,6 +111,84 @@ paths:
           content:
             application/json:
               schema: { $ref: "#/components/schemas/Project" }
+  /projects/{id}/events:
+    parameters:
+      - { name: id, in: path, required: true, schema: { type: string } }
+    get:
+      operationId: streamProjectEvents
+      summary: Browser-owned durable event stream with Last-Event-ID replay
+      responses:
+        "200":
+          description: Named SSE events; snapshot contains Project, other event data contains BuildEvent
+          content:
+            text/event-stream:
+              schema: { type: string }
+  /projects/{id}/builds/{buildId}/files/{file}:
+    parameters:
+      - { name: id, in: path, required: true, schema: { type: string } }
+      - { name: buildId, in: path, required: true, schema: { type: string } }
+      - { name: file, in: path, required: true, schema: { type: string, enum: [index.html, app.css, app.js] } }
+    get:
+      operationId: getBuildFile
+      summary: Private generated source or executable browser preview from App Storage
+      responses:
+        "200":
+          description: HTML, CSS, or JavaScript file
+          content:
+            text/plain:
+              schema: { type: string }
+  /projects/{id}/orders:
+    parameters:
+      - { name: id, in: path, required: true, schema: { type: string } }
+    get:
+      operationId: listOrders
+      responses:
+        "200":
+          description: Persisted orders for this browser-owned bakery app
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: "#/components/schemas/BakeryOrder" } }
+    post:
+      operationId: createOrder
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/BakeryOrderInput" }
+      responses:
+        "201":
+          description: Created order
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/BakeryOrder" }
+  /projects/{id}/orders/{orderId}:
+    parameters:
+      - { name: id, in: path, required: true, schema: { type: string } }
+      - { name: orderId, in: path, required: true, schema: { type: string } }
+    put:
+      operationId: updateOrder
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/BakeryOrderInput" }
+      responses:
+        "200":
+          description: Updated order; version is required to reject stale edits
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/BakeryOrder" }
+        "409": { description: Stale order version }
+    delete:
+      operationId: deleteOrder
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/BakeryOrderDeletionInput" }
+      responses:
+        "204": { description: Deleted }
+        "409": { description: Stale order version }
   /integrations:
     get:
       operationId: getIntegrations
@@ -211,6 +289,62 @@ components:
         detail: { type: string }
         status: { type: string, enum: [completed, running, failed, awaiting-approval] }
         createdAt: { type: string }
+    BuildEvent:
+      type: object
+      required: [id, projectId, type, detail, createdAt]
+      properties:
+        id: { type: string }
+        projectId: { type: string }
+        type: { type: string, enum: [plan_ready, approval_required, build_started, file_changed, preview_ready, test_started, test_passed, test_failed, build_completed, build_failed] }
+        detail: { type: string }
+        createdAt: { type: string }
+    BuildFile:
+      type: object
+      required: [name, bytes, sha256]
+      properties:
+        name: { type: string }
+        bytes: { type: integer }
+        sha256: { type: string }
+    BuildArtifact:
+      type: object
+      required: [id, kind, status, files, createdAt]
+      properties:
+        id: { type: string }
+        kind: { type: string, enum: [bakery-order-tracker] }
+        status: { type: string, enum: [building, ready, failed] }
+        files: { type: array, items: { $ref: "#/components/schemas/BuildFile" } }
+        previewUrl: { type: string }
+        createdAt: { type: string }
+    BakeryOrderInput:
+      type: object
+      additionalProperties: false
+      required: [customerName, items, quantity, pickupDate, status]
+      properties:
+        customerName: { type: string, minLength: 1, maxLength: 120 }
+        items: { type: string, minLength: 1, maxLength: 1000 }
+        quantity: { type: integer, minimum: 1, maximum: 10000 }
+        pickupDate: { type: string, pattern: "^\\d{4}-\\d{2}-\\d{2}$" }
+        status: { type: string, enum: [received, preparing, ready, collected] }
+        version: { type: integer, minimum: 1, description: Required for edits; optimistic concurrency token }
+    BakeryOrderDeletionInput:
+      type: object
+      additionalProperties: false
+      required: [version]
+      properties:
+        version: { type: integer, minimum: 1 }
+    BakeryOrder:
+      type: object
+      required: [id, customerName, items, quantity, pickupDate, status, version, createdAt, updatedAt]
+      properties:
+        id: { type: string }
+        customerName: { type: string }
+        items: { type: string }
+        quantity: { type: integer }
+        pickupDate: { type: string }
+        status: { type: string, enum: [received, preparing, ready, collected] }
+        version: { type: integer }
+        createdAt: { type: string }
+        updatedAt: { type: string }
     Requirements:
       type: object
       required: [goal, audience, constraints, questions]
@@ -253,6 +387,8 @@ components:
         requirements: { $ref: "#/components/schemas/Requirements" }
         plan: { $ref: "#/components/schemas/Plan" }
         prototype: { $ref: "#/components/schemas/Prototype" }
+        build: { $ref: "#/components/schemas/BuildArtifact" }
+        events: { type: array, items: { $ref: "#/components/schemas/BuildEvent" } }
         messages: { type: array, items: { $ref: "#/components/schemas/Message" } }
         activities: { type: array, items: { $ref: "#/components/schemas/Activity" } }
         tests: { type: array, items: { $ref: "#/components/schemas/TestResult" } }

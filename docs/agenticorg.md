@@ -1,11 +1,51 @@
-# Historical AgenticOrg setup — not active
+# AgenticOrg planning connection
 
-The user removed this integration after authorization failures. Active text
-planning, voice webhook planning, and prototype generation use OpenAI through
-Replit AI Integrations. AgenticOrg credentials are not required or read by those
-paths. The material below is an archived setup reference, not current instructions.
+Revi's text chat and authenticated planning webhook call the dedicated planner
+using the saved server-only credential:
 
-## Previous integration design
+- Base URL: `https://agenticorg.hackathon.pinelabs.com`
+- Planner UUID: `4df6fad9-59cc-4b6b-bd26-56a08fef55bf`
+- `POST /api/v1/agents/{UUID}/run`
+- Body: `{ "action": "process", "inputs": { "task": "..." }, "context": { "approval_required": true } }`
+
+The task includes experience level, existing requirements, recent conversation,
+planning-only instructions, and Revi's complete expected JSON Schema. The agent
+must be configured by its administrator as a tool-free product planner. Do not
+reuse a business agent with tools or lower its review threshold to pass a test.
+
+Only a `completed` run for the configured UUID, with a run ID, zero tool calls,
+and a strictly validated Revi response is accepted. Raw-output wrappers, unknown
+fields, empty answers, missing requirements, and malformed plans fail closed.
+There is no OpenAI planning fallback. OpenAI remains the separate data-only
+prototype generator, used only after explicit Revi plan approval.
+
+The run-only credential can execute even when metadata and approval reads are
+denied. The adapter therefore does not require a metadata/configuration preflight
+or a particular agent type name. It cannot attest to native schema enforcement:
+the AgenticOrg administrator must configure that separately using the supplied
+schema template. Revi always enforces its own strict schema and workflow checks.
+
+Human-review errors include the original run ID and approval-page URL. They do
+not approve, poll, or resubmit runs. An externally approved result is not yet
+automatically imported because the saved credential cannot read review status.
+Provider review is never equivalent to approving a build in Revi.
+
+Text planning allows up to 120 seconds; the voice webhook allows 45 seconds
+inside the external tool deadline. No automatic paid retries are made.
+Settings reports configuration, not health or a claimed successful plan.
+
+The live Revi webhook check reached the configured agent and returned a
+human-review-required error. No completed, validated live proposal is claimed.
+The application and offline transport/validation checks passed; the provider
+review/result-retrieval limitation remains.
+
+Run offline checks with `pnpm --filter @workspace/api-server run test:planning`.
+Paid live tests are explicit opt-in via `RUN_LIVE_PLANNING_TESTS=1`; do not enable
+them just to recheck an existing paused run.
+
+## Historical provisioning reference — not the active hackathon setup
+
+The remaining notes describe the old default-host setup, not current instructions.
 
 AgenticOrg is mandatory for Revi's product planning. Both text conversations and
 `POST /api/plan-project` use the native AgenticOrg agent-run API. They do not fall
@@ -95,12 +135,12 @@ runs. Proposals never authorize generation.
 
 ## Builder boundary
 
-This integration prepares product plans, not executable projects. The existing
-four data-only prototype renderers and their legacy generator are not a real
-bakery application builder. The next implementation must add the controlled
-bakery workflow, real persistent orders, preview URL, and measured test events.
-Do not claim that AgenticOrg planning or this builder is live until verified.
+AgenticOrg prepares product plans, not executable projects. After explicit Revi
+approval, the separate controlled bakery compiler generates real source files,
+private previews, persistent orders and measured checks. The other four legacy
+prototype renderers remain illustrative, not custom apps.
 
-The old optional `AGENTICORG_URL` adapter in prototype generation is a separate
-legacy custom contract, not this native planner. It must not be pointed at the
-native host or Grantex, or presented as a coding-agent integration.
+See `bakery-builder.md` for the builder boundary. A tested bakery build does not
+prove that a native AgenticOrg run completed. Human-gated runs still require an
+authorized completed-result retrieval path; never invent a plan or rerun a
+pending provider run merely to poll it. Provider review is not Revi build approval.

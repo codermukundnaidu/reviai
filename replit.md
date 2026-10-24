@@ -1,6 +1,6 @@
 # BuildBuddy Voice
 
-A goal-first AI developer companion for non-programmers, with approved plans, safe data-driven prototypes, and truthful workflow status.
+A goal-first AI developer companion for non-programmers, with approved plans, a controlled real bakery app builder, legacy data-driven prototypes, and truthful live workflow status.
 
 ## Run & Operate
 
@@ -35,12 +35,14 @@ A goal-first AI developer companion for non-programmers, with approved plans, sa
 - Publish on **Reserved VM with a single API process**, not multiple Autoscale instances: this release has process-local job coordination and background provider calls. A restart marks interrupted work failed and requires explicit retry.
 - Prototype generation returns only validated data for four prebuilt React renderers. This intentionally limits scope to avoid executing untrusted model code.
 - No accounts were requested. Projects are owned by an opaque, httpOnly browser cookie, not shared across devices; clearing cookies loses access.
-- The user removed the AgenticOrg requirement. Conversation, webhook planning, and safe prototype generation now use OpenAI through Replit AI Integrations, with strict structured output and independent validation. Do not call AgenticOrg or require its credentials. Keep explicit user approval before generation.
+- The user explicitly reconnected AgenticOrg as Revi's text/webhook planner. Use the configured hackathon instance and native UUID run endpoint with inputs.task; do not silently fall back to OpenAI for planning. Strictly validate completed tool-free results, and show failed or human-gated runs honestly. OpenAI through Replit AI Integrations is still the separate approved prototype generator. Keep explicit Revi approval before generation.
 
 ## Product
 
 - Select Beginner, Intermediate, Advanced or Pro, clarify an idea through AI text conversation, inspect understanding and explicitly approve a plan.
-- Supported prototype kinds: tracker, checklist, sum/average calculator, information browser. Interactive preview changes stay in localStorage; conversations and plans are in PostgreSQL.
+- Real builder MVP: explicitly approved bakery tracker plans compile into trusted HTML/CSS/JavaScript in a private temporary workspace, with durable source files in App Storage, a private executable preview, and real checks. It is a constrained coding workflow, not a programmatic Replit Agent API or arbitrary model-code execution. See `docs/bakery-builder.md`.
+- Bakery orders persist in PostgreSQL with project ownership checks and optimistic concurrency. Legacy tracker/checklist/calculator/information prototypes remain data-only/localStorage. Keep those capabilities distinct.
+- Project progress uses SSE with persisted event IDs and replay. Emit events only for actual backend work; never use hardcoded progress animations or invent test passes.
 - Inspect backend-persisted activity, actual structural checks, review decisions and project history.
 - Voice uses the official ElevenLabs public-agent widget, loaded on demand from the home/project microphone controls. Calls remain separate from saved project chat and must not bypass explicit plan approvals. No ElevenLabs API key is required for this public embed.
 - Revi must call `understand_and_plan_project` only once the user's idea is sufficiently understood, not after every sentence. Acknowledgements and approvals do not trigger replanning; meaningful revisions or answered clarification questions can.

@@ -1,2 +1,3 @@
 - [AI response contracts](ai-response-contracts.md) — valid JSON alone is insufficient for workflow-state responses; preserve strict structured outputs plus validation.
-- [Planning provider decision](agenticorg-requirement.md) — user removed AgenticOrg after authorization failures; use the configured AI integration, preserving approval and validation.
+- [Planning provider decision](agenticorg-requirement.md) — user explicitly reconnected AgenticOrg; hackathon run-only access differs from metadata/review access.
+- [Builder verification evidence](builder-evidence.md) — an approved test fixture can verify the builder, but never proves that native AgenticOrg planning completed.

@@ -8,6 +8,17 @@
 
 export * from './activity';
 export * from './activityStatus';
+export * from './bakeryOrder';
+export * from './bakeryOrderDeletionInput';
+export * from './bakeryOrderInput';
+export * from './bakeryOrderInputStatus';
+export * from './bakeryOrderStatus';
+export * from './buildArtifact';
+export * from './buildArtifactKind';
+export * from './buildArtifactStatus';
+export * from './buildEvent';
+export * from './buildEventType';
+export * from './buildFile';
 export * from './healthStatus';
 export * from './integrationStatus';
 export * from './message';
