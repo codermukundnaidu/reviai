@@ -15,6 +15,21 @@ Keep provider-enforced structured output, server validation, explicit user
 approval, and implementation as separate stages. The remaining notes are
 historical guidance only if the user explicitly requests AgenticOrg again.
 
+For this project's AgenticOrg tests, use the user-provided hackathon instance:
+`https://agenticorg.hackathon.pinelabs.com`, not the SDK's default
+`https://app.agenticorg.ai`.
+
+**Why:** The user supplied the SDK configuration for their instance. Its native
+UUID run endpoint accepted a request even while the metadata endpoint denied
+access. Earlier default-host errors did not establish credential validity on
+the intended instance.
+
+**How to apply:** A request to test another agent does not itself restore
+AgenticOrg as Revi's provider. Use UUID execution with the documented `task`
+input, distinguish metadata permissions from execution permissions, and inspect
+the returned status and sanitized error rather than treating HTTP 200 as a
+completed plan. Do not send credentials across hosts through redirects.
+
 Shadow status alone does not mean an AgenticOrg agent cannot run.
 
 **Why:** AgenticOrg's documented native runtime permits shadow test execution.
