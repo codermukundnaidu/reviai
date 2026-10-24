@@ -151,7 +151,7 @@ test("authenticated traffic is bounded by a per-process planning budget", async 
 });
 
 test("configured real planner honors a complete idea and returns a validated proposal", {
-  skip: !process.env.AI_INTEGRATIONS_OPENAI_API_KEY,
+  skip: !(process.env.AGENTICORG_API_KEY && process.env.AGENTICORG_PLANNER_ID),
   timeout: 55000,
 }, async () => {
   const result = await planFromIdea(input);
@@ -161,7 +161,7 @@ test("configured real planner honors a complete idea and returns a validated pro
 });
 
 test("configured real planner asks one question for an incomplete idea", {
-  skip: !process.env.AI_INTEGRATIONS_OPENAI_API_KEY,
+  skip: !(process.env.AGENTICORG_API_KEY && process.env.AGENTICORG_PLANNER_ID),
   timeout: 55000,
 }, async () => {
   const result = await planFromIdea({ idea: "I need help organizing things.", experience_level: "Beginner", context: "" });

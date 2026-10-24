@@ -2,7 +2,11 @@ import { build } from "esbuild";
 import { spawnSync } from "node:child_process";
 
 await build({
-  entryPoints: ["src/lib/plan-project.test.ts"],
+  stdin: {
+    contents: 'import "./src/lib/plan-project.test.ts"; import "./src/lib/agenticorg-planner.test.ts";',
+    resolveDir: process.cwd(),
+    loader: "ts",
+  },
   outfile: "dist/planning.test.mjs",
   bundle: true,
   platform: "node",

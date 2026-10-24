@@ -6,6 +6,7 @@
   "scripts": {
     "hello": "tsx ./src/hello.ts",
     "configure:revi": "tsx ./src/configure-revi.ts",
+    "configure:agenticorg": "tsx ./src/configure-agenticorg.ts",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "devDependencies": {

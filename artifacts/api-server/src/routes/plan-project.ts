@@ -2,6 +2,7 @@ import { Router, type IRouter } from "express";
 import { createHash, timingSafeEqual } from "node:crypto";
 import { PlanProjectBody, type PlanningInput } from "@workspace/api-zod";
 import { planFromIdea, validatePlanningResult } from "../lib/plan-project";
+import { isAgenticOrgPlanningConfigured } from "../lib/agenticorg-planner";
 
 type Planner = (input: PlanningInput) => Promise<unknown>;
 type Options = {
@@ -15,8 +16,7 @@ export function createPlanningRouter(options: Options = {}): IRouter {
   const router = Router();
   const planner = options.planner ?? planFromIdea;
   const getSecret = options.getSecret ?? (() => process.env.PLANNING_WEBHOOK_SECRET);
-  const isConfigured = options.isConfigured ?? (() =>
-    Boolean(process.env.AI_INTEGRATIONS_OPENAI_API_KEY && process.env.AI_INTEGRATIONS_OPENAI_BASE_URL));
+  const isConfigured = options.isConfigured ?? isAgenticOrgPlanningConfigured;
   type Result = ReturnType<typeof validatePlanningResult>;
   const cache = new Map<string, { expires: number; result: Promise<Result> }>();
   let active = 0;
@@ -42,7 +42,7 @@ export function createPlanningRouter(options: Options = {}): IRouter {
       res.status(400).json({ error: "Expected idea, experience_level, context, and optionally constraints, within the documented limits" }); return;
     }
     if (!isConfigured()) {
-      res.status(503).json({ error: "Planning AI is not configured" }); return;
+      res.status(503).json({ error: "AgenticOrg planning is required but not configured. No substitute planner will be used." }); return;
     }
 
     const now = Date.now();

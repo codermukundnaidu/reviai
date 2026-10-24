@@ -1,75 +1,99 @@
-# Optional AgenticOrg backend adapter
+# Mandatory AgenticOrg product planner
 
-No AgenticOrg connection is currently configured. Normal prototype generation uses Replit AI Integrations for OpenAI. The app does not fabricate AgenticOrg outputs or logs.
+AgenticOrg is mandatory for Revi's product planning. Both text conversations and
+`POST /api/plan-project` use the native AgenticOrg agent-run API. They do not fall
+back to OpenAI. Missing configuration returns HTTP 503 before planning or
+invalidating an existing project plan.
 
-This is a documented HTTP integration point, **not a verified native AgenticOrg SDK implementation**. If your AgenticOrg deployment uses a different API, put a small trusted bridge in front of it or adapt `buddy-agent.ts` to its documented contract.
+## Current blocker
 
-## Configure
+Agent discovery worked, but creating the dedicated planner returned HTTP 403.
+A subsequent non-mutating permission probe (an invalid create body) returned HTTP
+401. No dedicated planner was created or activated, and no successful native
+planning run has been claimed. An AgenticOrg administrator must authorize a
+valid key for discovery, creation/configuration, and execution, or create the
+planner manually and provide an execution-authorized key.
 
-Use Replit's Secrets/publishing configuration—not chat or frontend source—to provide:
+Never use `https://api.grantex.dev` as the planning URL: it is the authorization
+service, not the AgenticOrg runtime. Never send the AgenticOrg key there.
 
-- `AGENTICORG_URL`: the complete HTTPS endpoint of a trusted adapter you control.
-- `AGENTICORG_API_KEY`: its bearer credential.
+## Provisioning
 
-Both settings must exist to enable the adapter. Restart the API workflow after configuring development settings; configure production values separately when publishing. The Settings screen reports connection **configuration**, not a successful provider health check.
+The verified native host, from AgenticOrg's official SDK, is
+`https://app.agenticorg.ai`. Server-side configuration:
 
-## Request contract
+- `AGENTICORG_API_KEY`: sensitive credential, entered only through Secrets.
+- `AGENTICORG_PLANNER_ID`: non-secret UUID of the dedicated product planner.
+- `PLANNING_WEBHOOK_SECRET`: existing server-to-server ElevenLabs authorization.
 
-Only after the user explicitly approves a plan, the backend sends an HTTPS POST:
+With an authorized key, run:
+
+```sh
+pnpm --filter @workspace/scripts run configure:agenticorg
+```
+
+The operator-only script creates **Revi Product Planner**, type
+`buildbuddy_product_planner`, domain `ops`, in **shadow** mode with no authorized
+tools, no connectors, and default-tool assignment disabled. It uses the prompt
+and JSON Schema in `docs/agenticorg-planner.template.json`, then verifies the
+saved configuration. It never overwrites a different existing prompt, promotes
+an agent, changes global permissions, or modifies DevMate.
+
+The administrator can instead use that same template through AgenticOrg's UI.
+Set its schema through the supported agent output-schema control. AgenticOrg
+stores it as `config.output_schema_json`. The platform only enforces it on runs
+when `AGENTICORG_OUTPUT_SCHEMA_ENFORCED` is enabled; have the administrator
+confirm that policy. Revi independently validates all returned data and workflow
+invariants regardless of that provider setting.
+
+Set `AGENTICORG_PLANNER_ID` through environment configuration after read-back
+succeeds, restart the API, then run:
+
+```sh
+pnpm --filter @workspace/api-server run test:planning
+```
+
+Two live planner checks run only when both the key and planner ID are configured.
+They must confirm one question for incomplete requirements and a proposal for a
+complete idea. Local transport tests are not evidence of a working external run.
+
+## Native execution
+
+The backend checks the agent's metadata, tool-free configuration, lifecycle,
+and declared output schema before calling:
 
 ```http
-Content-Type: application/json
+POST https://app.agenticorg.ai/api/v1/agents/{AGENTICORG_PLANNER_ID}/run
 Authorization: Bearer <server-only credential>
+Content-Type: application/json
 ```
 
 ```json
 {
-  "projectId": "opaque-project-id",
-  "experienceLevel": "Beginner",
-  "requirements": {
-    "goal": "Keep daily tasks visible",
-    "audience": "Only me",
-    "constraints": ["No paid external services"],
-    "questions": []
+  "action": "plan_project",
+  "inputs": {
+    "experience_level": "Beginner",
+    "requirements": { "goal": "", "audience": "", "constraints": [], "questions": [] },
+    "messages": [{ "role": "user", "content": "The user's idea and conversation context" }]
   },
-  "approvedPlan": {
-    "title": "Daily task checklist",
-    "kind": "checklist",
-    "rationale": "A checklist is sufficient; a website is not necessary.",
-    "steps": ["Create a task list", "Try checking off and adding items"]
-  },
-  "outputContract": {
-    "prototype": {
-      "kind": "checklist",
-      "title": "string",
-      "description": "string",
-      "items": ["string"]
-    }
-  }
+  "context": { "approval_required": true }
 }
 ```
 
-## Required response
+Only a canonical completed run for the expected agent with a run ID, zero tool
+calls, and a structured output object is accepted. Its output must contain
+`reply`, `title`, `requirements`, and nullable `plan`, matching the template.
+Revi rejects failed, human-gated, budget-exceeded, malformed, or tool-executing
+runs. Proposals never authorize generation.
 
-Return HTTP 200 and JSON with a `prototype` property:
+## Builder boundary
 
-```json
-{
-  "prototype": {
-    "kind": "checklist",
-    "title": "My daily tasks",
-    "description": "A local prototype with illustrative starting content.",
-    "items": ["Review today's priorities", "Complete the most important task"]
-  }
-}
-```
+This integration prepares product plans, not executable projects. The existing
+four data-only prototype renderers and their legacy generator are not a real
+bakery application builder. The next implementation must add the controlled
+bakery workflow, real persistent orders, preview URL, and measured test events.
+Do not claim that AgenticOrg planning or this builder is live until verified.
 
-Supported kinds are `tracker`, `checklist`, `calculator`, `information`, and the kind must match the approved plan. Title: 1–160 characters. Description: 1–3000. Items: 1–20 non-empty strings, each at most 1000 characters. No extra properties inside `prototype`.
-
-- Calculator: unique input labels; the renderer sums inputs and shows their average. No custom formulas.
-- Information: each item is `Heading: paragraph body`.
-- Tracker/checklist: short actionable labels.
-
-No HTML, JavaScript, executable artifacts, external account operations or provider-supplied execution logs are accepted. The adapter should only prepare prototype data, not perform consequential external actions.
-
-The backend validates the returned data, runs structural checks, and persists the real success/failure events. An invalid response, timeout, redirect or HTTP error becomes a failed action. There is no silent fallback from a configured failing adapter to another provider.
+The old optional `AGENTICORG_URL` adapter in prototype generation is a separate
+legacy custom contract, not this native planner. It must not be pointed at the
+native host or Grantex, or presented as a coding-agent integration.

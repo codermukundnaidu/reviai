@@ -8,6 +8,7 @@ import {
 } from "@workspace/api-zod";
 import { activity, message, loadProject, listProjects, saveProject, now, type Project } from "../lib/project-store";
 import { clarify } from "../lib/buddy-agent";
+import { isAgenticOrgPlanningConfigured } from "../lib/agenticorg-planner";
 import { buildProject, busyProjects } from "../lib/build-project";
 
 const router: IRouter = Router();
@@ -55,8 +56,8 @@ function available(project: Project, res: Response) {
 }
 router.get("/integrations", (_req, res) => {
   res.json(GetIntegrationsResponse.parse({
-    ai: Boolean(process.env.AI_INTEGRATIONS_OPENAI_BASE_URL && process.env.AI_INTEGRATIONS_OPENAI_API_KEY),
-    agenticOrg: Boolean(process.env.AGENTICORG_URL && process.env.AGENTICORG_API_KEY),
+    ai: isAgenticOrgPlanningConfigured(),
+    agenticOrg: isAgenticOrgPlanningConfigured(),
     voice: true,
   }));
 });
@@ -86,6 +87,10 @@ router.post("/projects/:id/messages", async (req, res): Promise<void> => {
   if (!parsed.success || !parsed.data.content.trim()) { res.status(400).json({ error: "Enter a message (up to 10,000 characters)" }); return; }
   const project = await find(req, res);
   if (!project || !available(project, res)) return;
+  if (!isAgenticOrgPlanningConfigured()) {
+    res.status(503).json({ error: "AgenticOrg planning is required but not configured. No substitute planner will be used." });
+    return;
+  }
   busyProjects.add(project.id);
   message(project, "user", parsed.data.content.trim());
   // Any new requirements invalidate prior plan approval and test results.
@@ -97,7 +102,7 @@ router.post("/projects/:id/messages", async (req, res): Promise<void> => {
   for (const event of project.activities) if (event.status === "awaiting-approval") {
     event.status = "completed"; event.detail += " Superseded by a new conversation turn.";
   }
-  const event = activity(project, "Understanding your idea", "Sending your conversation to the AI assistant to clarify requirements.", "running");
+  const event = activity(project, "Understanding your idea", "Requesting requirements and a proposal from the configured AgenticOrg planner.", "running");
   try {
     await saveProject(project, res.locals.owner);
     const result = await clarify(project);
@@ -107,12 +112,12 @@ router.post("/projects/:id/messages", async (req, res): Promise<void> => {
     project.status = result.plan ? "awaiting-approval" : "discovering";
     message(project, "assistant", result.reply);
     event.status = "completed";
-    event.detail = "AI response received and requirements updated.";
+    event.detail = "AgenticOrg response validated and requirements updated.";
     if (result.plan) activity(project, "Plan awaiting approval", "No generation will begin until you explicitly approve this plan.", "awaiting-approval");
     await saveProject(project, res.locals.owner);
     res.json(SendMessageResponse.parse(project));
   } catch (err) {
-    req.log.error({ err, projectId: project.id }, "Conversation failed");
+    req.log.error({ errorType: err instanceof Error ? err.name : "UnknownError", projectId: project.id }, "AgenticOrg planning failed");
     event.status = "failed"; event.detail = "AI request failed or returned invalid data. No plan was approved.";
     message(project, "assistant", "I couldn't process that message right now. Please try again. Your conversation has been saved.");
     await saveProject(project, res.locals.owner);

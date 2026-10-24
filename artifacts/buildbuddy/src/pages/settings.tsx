@@ -3,8 +3,8 @@ import { useGetIntegrations } from '@workspace/api-client-react';
 export default function Settings() {
   const { data, isLoading, isError, refetch } = useGetIntegrations();
   const rows = [
-    { id: 'ai', name: 'AI model', on: data?.ai, yes: 'Connected. Conversation and planning use the real model.', no: 'Not configured on the server. Messages cannot be answered until it is.' },
-    { id: 'agenticorg', name: 'AgenticOrg backend', on: data?.agenticOrg, yes: 'Credentials are present on the server. Build activity reflects what the backend reports.', no: 'Not connected. Builds are not delegated to AgenticOrg, and nothing here pretends otherwise.' },
+    { id: 'ai', name: 'Planning provider', on: data?.ai, yes: 'AgenticOrg is configured for conversation and planning. Every response is validated; no substitute planner is used.', no: 'AgenticOrg is required. Planning is blocked until an authorized key and a dedicated planner are configured. There is no OpenAI planning fallback.' },
+    { id: 'agenticorg', name: 'AgenticOrg planner configuration', on: data?.agenticOrg, yes: 'A server-only key and planner ID are set. Configuration is not a health check: execution permissions, tool-free settings, and returned plans are checked on each request.', no: 'Not configured. AgenticOrg must authorize access to a tool-free product planner before Revi can propose a plan.' },
     { id: 'voice', name: 'ElevenLabs voice', on: data?.voice, yes: 'Public agent linked. Choose Talk with voice, then start a call in the ElevenLabs panel. Microphone permission is required. Calls are separate from saved project chat; this status indicates configuration, not a live call health check.', no: 'Voice agent is not configured.' },
   ];
   return (
@@ -18,7 +18,7 @@ export default function Settings() {
             <span className={`mt-1.5 size-2.5 rounded-full shrink-0 ${isLoading ? 'bg-muted animate-pulse' : r.on ? 'bg-primary' : 'bg-muted-foreground/40'}`} />
             <div>
               <div className="font-medium flex items-center gap-2">{r.name}
-                <span className="text-xs font-normal text-muted-foreground" data-testid={`status-${r.id}`}>{isLoading ? 'checking' : r.on ? 'connected' : 'not connected'}</span></div>
+                <span className="text-xs font-normal text-muted-foreground" data-testid={`status-${r.id}`}>{isLoading ? 'checking' : r.on ? 'configured' : 'not configured'}</span></div>
               <p className="text-sm text-muted-foreground mt-1">{isLoading ? 'Checking...' : r.on ? r.yes : r.no}</p>
             </div>
           </div>
